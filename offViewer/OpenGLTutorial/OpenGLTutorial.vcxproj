@@ -149,11 +149,13 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="OFFReader.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="zpr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Grid.h" />
     <ClInclude Include="OFFReader.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="zpr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

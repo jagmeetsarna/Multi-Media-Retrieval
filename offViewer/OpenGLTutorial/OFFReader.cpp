@@ -21,7 +21,7 @@ typedef struct Face
 } Face;
 
 
-Grid* openFile(const char* fileName) {
+Grid* openFile(string fileName) {
 
 	int vertex_count, faces_count;
 
