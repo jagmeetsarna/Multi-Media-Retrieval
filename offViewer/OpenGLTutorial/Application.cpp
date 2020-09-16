@@ -9,6 +9,8 @@ using namespace std;
 
 string fileName;
 
+int drawing_style = 0;
+
 
 Grid* grid = 0;
 Renderer renderer;
@@ -24,13 +26,22 @@ void draw()												                //Render the 3D mesh (GLUT callback funct
     renderer.draw(*grid);
 }
 
-void viewing(int W, int H)								                //Window resize function, sets up viewing parameters (GLUT callback function)
-{                                                                       // TODO: THIS DOES NOT REALLY WORK RN
-    glMatrixMode(GL_PROJECTION);						                //1. Set the projection matrix
-    glLoadIdentity();
-    gluPerspective(fov, float(W) / H, z_near, z_far);
+void viewing(int W, int H)								//Window resize function, sets up viewing parameters (GLUT callback function)
+{
 
-    glViewport(0, 0, W, H);								                //2. Set the viewport to the entire size of the rendering window
+    if (H == 0)
+        H = 1;
+
+    float ratio = W * 1.0 / W;
+
+    glMatrixMode(GL_PROJECTION);						//1. Set the projection matrix
+    glLoadIdentity();
+    //gluPerspective(fov,float(W)/H,z_near,z_far);
+    gluPerspective(45, ratio, 1, 100);
+    glViewport(0, 0, W, H);
+    glMatrixMode(GL_MODELVIEW);
+
+    //glViewport(0,0,W,H);								//2. Set the viewport to the entire size of the rendering window
 }
 
 string getFileName(int index) {
@@ -67,17 +78,23 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         index += 1;
         fileName = getFileName(index);
         cout << fileName << endl;//Grab the file, TODO: implement in a better way
-        grid = openFile("0/" + fileName + "/" + fileName + ".off");
+        grid = openFile(fileName);
 
         break;
     }
-    /*case 'R':											// 'r','R': Reset the viewpoint
+    case 'R':											// 'r','R': Reset the viewpoint
     case 'r':
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         zprInit(0, 0, 0);
         break;
-    */
+    case 'D':
+    case 'd':
+    {
+        drawing_style = (++drawing_style) % 4;
+        renderer.setDrawingStyle((Renderer::DRAW_STYLE)drawing_style);
+        break;
+    }
     }
     glutPostRedisplay();
 }
@@ -87,7 +104,13 @@ int main(int argc, char* argv[])
 
     fileName = getFileName(index);         
     cout << fileName << endl;//Grab the file, TODO: implement in a better way
-    grid = openFile("0/" + fileName + "/" + fileName + ".off");
+    string input;
+    cout << "Please specify the file you want to view:" << endl;
+    cin >> input;
+    grid = openFile(input);
+    grid->normalize();									//7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
+    grid->computeFaceNormals();							//8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
+    grid->computeVertexNormals();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

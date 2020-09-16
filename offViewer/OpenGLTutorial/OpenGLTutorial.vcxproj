@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)Dependencies;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +157,10 @@
   <ItemGroup>
     <ClInclude Include="Grid.h" />
     <ClInclude Include="OFFReader.h" />
+    <ClInclude Include="Point3d.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="ScalarAttributes.h" />
+    <ClInclude Include="VectorAttributes.h" />
     <ClInclude Include="zpr.h" />
   </ItemGroup>
   <ItemGroup>

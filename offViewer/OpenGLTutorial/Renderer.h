@@ -29,7 +29,10 @@ public:
 
 protected:
 
-	void			drawGrid(Grid&);
+	void drawGrid(Grid&);
+	void drawPoints(Grid&);
+	void drawC0Cells(Grid&);
+	void drawC1Cells(Grid&);
 
 	DRAW_STYLE		draw_style;
 };
