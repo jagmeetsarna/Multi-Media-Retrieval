@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-
-using namespace std;
+#include <stdio.h>
+#include <string>
 
 
 
@@ -30,18 +30,23 @@ public:
 
 	void getPoint(int i, float* p);
 
-	void setPoint(int i, vector<float> p);
+	void setPoint(int i, std::vector<float> p);
 
-	void setCell(int cell, vector<int> vertices);
+	void setCell(int cell, std::vector<int> vertices);
+
+	void setClass(std::string newcls);
 
 	int	 getCell(int cell, int* vertices);
+
+	std::string getClass();
 
 
 
 protected:
 
-	vector<float>		pointsX, pointsY, pointsZ;
-	vector<int>			cells;
+	std::vector<float> pointsX, pointsY, pointsZ;
+	std::vector<int>	cells;
+	std::string	cls;
 };
 
 

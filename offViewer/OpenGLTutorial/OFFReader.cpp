@@ -47,8 +47,6 @@ Grid* openFile(string fileName) {
 
 		for (j = 0; j < vertex_count; j++)
 		{
-
-			string line;
 			getline(offFile, line);
 			vector<string> vert;
 			stringVector = split(line, ' ');

@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+using namespace std;
+
 
 
 void Grid::getPoint(int i, float* p)
@@ -33,5 +35,15 @@ void Grid::setCell(int cell, vector<int> vertices)
 	cells[3 * cell] = vertices[0];
 	cells[3 * cell + 1] = vertices[1];
 	cells[3 * cell + 2] = vertices[2];
+}
+
+string Grid::getClass()
+{
+	return cls;
+}
+
+void Grid::setClass(string newcls)
+{
+	cls = newcls;
 }
 
