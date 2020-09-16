@@ -1,2 +1,20 @@
 ﻿  Application.cpp
-  OpenGLTutorial.vcxproj -> C:\Users\leoze\Desktop\Multi-Media-Retrieval\offViewer\Debug\OpenGLTutorial.exe
+  Grid.cpp
+  OFFReader.cpp
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\OFFReader.cpp(28,6): warning C4551: function call missing argument list
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\OFFReader.cpp(45,7): warning C4101: 'i': unreferenced local variable
+  Renderer.cpp
+  zpr.cpp
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(97,22): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(97,20): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(97,18): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(120,26): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(120,23): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(120,20): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(120,13): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(136,44): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(136,31): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(136,18): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+D:\Desktop\Multi-Media-Retrieval\offViewer\OpenGLTutorial\zpr.cpp(310,14): warning C4101: 'k': unreferenced local variable
+  Generating Code...
+  OpenGLTutorial.vcxproj -> D:\Desktop\Multi-Media-Retrieval\offViewer\Debug\OpenGLTutorial.exe

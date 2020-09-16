@@ -9,9 +9,9 @@ using namespace std;
 
 string fileName;
 
+
 Grid* grid = 0;
 Renderer renderer;
-GLFWwindow* window;
 
 int index = 0;
 
@@ -89,11 +89,8 @@ int main(int argc, char* argv[])
     cout << fileName << endl;//Grab the file, TODO: implement in a better way
     grid = openFile("0/" + fileName + "/" + fileName + ".off");
 
-
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-
                                                                         //Ask GLUT to create next windows with a RGB framebuffer and a Z-buffer too
     glutInitWindowSize(500, 500);							            //Tell GLUT how large are the windows we want to create next
     glutCreateWindow(fileName.c_str());	                                //Create our window
@@ -104,6 +101,7 @@ int main(int argc, char* argv[])
     glutDisplayFunc(draw);								                //Add a drawing callback to the window
     //glutReshapeFunc(viewing);
     glutMainLoop();										                //Start the event loop that displays the graph and handles window-resize events
+
 
     return 0;
 }
