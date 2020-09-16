@@ -8,6 +8,5 @@ struct FilterItem
 	int numFaces;
 	int numVertices;
 	std::string typeOfFace;
-	int minX, maxX, minY, MaxY, minZ, maxZ;
-
+	float minX, maxX, minY, maxY, minZ, maxZ;
 };

@@ -2,6 +2,8 @@
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <fstream>
+#include <tuple>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
@@ -12,6 +14,8 @@ string fileName;
 Grid* grid = 0;
 Renderer renderer;
 GLFWwindow* window;
+
+FilterItem* fis;
 
 int index = 0;
 
@@ -67,8 +71,63 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         index += 1;
         fileName = getFileName(index);
         cout << fileName << endl;//Grab the file, TODO: implement in a better way
-        grid = openFile("0/" + fileName + "/" + fileName + ".off");
+        std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
+        grid = std::get<0>(tup);
+        fis[index] = std::get<1>(tup);
 
+        break;
+    }
+    case 'o':
+    {
+        fileName = "FilterOutput.csv";
+        fstream filtout;
+        filtout.open(fileName, ios::out);
+        filtout << "sep=," <<endl;
+        filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
+        for (int i = 0; i < 100; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+                break;
+
+            filtout << i;
+            filtout << ",";
+            filtout << fi.cls;
+            filtout << ",";
+            filtout << fi.numFaces;
+            filtout << ",";
+            filtout << fi.numVertices;
+            filtout << ",";
+            filtout << fi.typeOfFace;
+            filtout << ",";
+            filtout << fi.minX;
+            filtout << ",";
+            filtout << fi.maxX;
+            filtout << ",";
+            filtout << fi.minY;
+            filtout << ",";
+            filtout << fi.maxY;
+            filtout << ",";
+            filtout << fi.minZ;
+            filtout << ",";
+            filtout << fi.maxZ;
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        break;
+    }
+    case 's':
+    {
+        cout << "Scanning..." << endl;
+        for (int i = 0; i < 100; i++) //TODO scan entire database
+        {
+            string fln = getFileName(i);
+            std::tuple<Grid*, FilterItem> tup = openFile("0/" + fln + "/" + fln + ".off");
+            fis[i] = std::get<1>(tup);
+        }
+        cout << "Scanning complete!" << endl;
         break;
     }
     /*case 'R':											// 'r','R': Reset the viewpoint
@@ -84,11 +143,13 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 
 int main(int argc, char* argv[])
 {
+    fis = new FilterItem[100];
 
     fileName = getFileName(index);         
     cout << fileName << endl;//Grab the file, TODO: implement in a better way
-    grid = openFile("0/" + fileName + "/" + fileName + ".off");
-
+    std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
+    grid = std::get<0>(tup);
+    fis[index] = std::get<1>(tup);
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

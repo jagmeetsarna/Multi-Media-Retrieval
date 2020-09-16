@@ -4,9 +4,11 @@
 #include <vector>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include "OFFReader.h"
 #include "Grid.h"
 #include "Renderer.h"
+#include "FilterItem.h"
 using namespace std;
 
 typedef struct Vertex
@@ -21,9 +23,10 @@ typedef struct Face
 } Face;
 
 
-Grid* openFile(string fileName) {
-
-	int vertex_count, faces_count;
+std::tuple<Grid*, FilterItem> openFile(string fileName)
+{
+	FilterItem fi;
+	Grid* grid;
 
 	if (file_exists) {
 		ifstream offFile(fileName);
@@ -39,13 +42,16 @@ Grid* openFile(string fileName) {
 		vector<string> stringVector;
 		stringVector = split(counterLine, ' ');
 
-		vertex_count = stoi(stringVector[0]);
-		faces_count = stoi(stringVector[1]);
+		fi.numVertices = stoi(stringVector[0]);
+		fi.numFaces = stoi(stringVector[1]);
 
 		int i, j;
-		Grid* grid = new Grid(vertex_count, faces_count);
+		grid = new Grid(fi.numVertices, fi.numFaces);
 
-		for (j = 0; j < vertex_count; j++)
+		float mix = FLT_MAX, miy = FLT_MAX, miz = FLT_MAX;
+		float max = FLT_MIN, may = FLT_MIN, maz = FLT_MIN;
+
+		for (j = 0; j < fi.numVertices; j++)
 		{
 			getline(offFile, line);
 			vector<string> vert;
@@ -59,9 +65,27 @@ Grid* openFile(string fileName) {
 			V.push_back(v.y);
 			V.push_back(v.z);
 			grid->setPoint(j, V);
+
+			max = std::max(v.x, max);
+			may = std::max(v.y, may);
+			maz = std::max(v.z, maz);
+			
+			mix = std::min(v.x, mix);
+			miy = std::min(v.y, miy);
+			miz = std::min(v.z, miz);
 		}
 
-		for (j = 0; j < faces_count; j++)
+		fi.maxX = max;
+		fi.maxY = may;
+		fi.maxZ = maz;
+		
+		fi.minX = mix;
+		fi.minY = miy;
+		fi.minZ = miz;
+
+		bool allTriangles = true, allQuads = true;
+
+		for (j = 0; j < fi.numFaces; j++)
 		{
 			string line;
 			getline(offFile, line);
@@ -69,21 +93,28 @@ Grid* openFile(string fileName) {
 			stringVector = split(line, ' ');
 			Face face;
 			int vertex_num = stoi(stringVector[0]);
+			allTriangles &= vertex_num == 3;
+			allQuads &= vertex_num == 4;
 			for (int i = 0; i < vertex_num; i++) {
 				face.verts.push_back(stoi(stringVector[i + 1]));
 			}
 			grid->setCell(j, face.verts);
 		}
 
-		return grid;
+		if (allTriangles)
+			fi.typeOfFace = "triangles";
+		else if (allQuads)
+			fi.typeOfFace = "quads";
+		else
+			fi.typeOfFace = "mix";
 
-
+		return make_tuple(grid, fi);
 	}
 
 
 	else {
 		cout << "FILE DOES NOT EXIST!" << endl;
-		return NULL;
+		return make_tuple(grid, fi);
 	}
 
 }
