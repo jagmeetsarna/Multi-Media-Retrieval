@@ -89,7 +89,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             FilterItem fi = fis[i];
 
             if (fi.typeOfFace == "")
-                break;
+                continue;
 
             filtout << i;
             filtout << ",";
@@ -116,6 +116,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         }
 
         cout << "Outputted!" << endl;
+        filtout.close();
         break;
     }
     case 's':
@@ -130,6 +131,12 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         cout << "Scanning complete!" << endl;
         break;
     }
+    case 'l':
+    {
+        cout << "Loading from output file" << endl;
+        loadFilter();
+        break;
+    }
     /*case 'R':											// 'r','R': Reset the viewpoint
     case 'r':
         glMatrixMode(GL_MODELVIEW);
@@ -141,10 +148,46 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     glutPostRedisplay();
 }
 
+void loadFilter()
+{
+    fstream filtin;
+    string line;
+    filtin.open("FilterOutput.csv", ios::in);
+    if (filtin)
+    {
+        getline(filtin, line);
+        getline(filtin, line);
+        while (!filtin.eof())
+        {
+            getline(filtin, line);
+            vector<string> vec = split(line, ',');
+            if (size(vec) == 0)
+                continue;
+            FilterItem fi;
+            fi.cls = vec[1];
+            fi.numFaces = stoi(vec[2]);
+            fi.numVertices = stoi(vec[3]);
+            fi.typeOfFace = vec[4];
+            fi.minX = stof(vec[5]);
+            fi.maxX = stof(vec[6]);
+            fi.minY = stof(vec[7]);
+            fi.maxY = stof(vec[8]);
+            fi.minZ = stof(vec[9]);
+            fi.maxZ = stof(vec[10]);
+            fis[stoi(vec[0])] = fi;
+        }
+        filtin.close();
+    }
+    else
+    {
+        cout << "No previous filter output found" << endl;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     fis = new FilterItem[100];
-
+    loadFilter();
     fileName = getFileName(index);         
     cout << fileName << endl;//Grab the file, TODO: implement in a better way
     std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
