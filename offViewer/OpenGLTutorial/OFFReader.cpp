@@ -30,8 +30,9 @@ std::tuple<Grid*, FilterItem> openFile(string fileName)
 
 	int vertex_count, faces_count;
 
+	ifstream first_file(fileName);
+
 	if (first_file) {
-		ifstream first_file(fileName);
 		string line;
 
 		/*while (getline(first_file, line)) {
@@ -62,8 +63,8 @@ std::tuple<Grid*, FilterItem> openFile(string fileName)
 		vertex_count = stoi(string_vector[0]);
 		faces_count = stoi(string_vector[1]);
 
-		fi.numVertices = stoi(stringVector[0]);
-		fi.numFaces = stoi(stringVector[1]);
+		fi.numVertices = stoi(string_vector[0]);
+		fi.numFaces = stoi(string_vector[1]);
 
 
 		int i, j;
@@ -116,7 +117,6 @@ std::tuple<Grid*, FilterItem> openFile(string fileName)
 
 			int vertex_num = stoi(string_vector[0]);
 
-			int vertex_num = stoi(stringVector[0]);
 			allTriangles &= vertex_num == 3;
 			allQuads &= vertex_num == 4;
 
