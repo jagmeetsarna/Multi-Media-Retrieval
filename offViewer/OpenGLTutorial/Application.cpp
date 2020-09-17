@@ -4,6 +4,9 @@
 #include <filesystem>
 #include <iostream>
 #include <filesystem>
+
+#include <fstream>
+#include <tuple>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
@@ -16,6 +19,8 @@ int drawing_style = 0;
 
 Grid* grid = 0;
 Renderer renderer;
+
+FilterItem* fis;
 
 int index = 0;
 
@@ -77,19 +82,24 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     {
     case ' ':											    // space:   Toggle through the various drawing styles of the mesh renderer
     {
-        index += 1;
+        /*index += 1;
         fileName = getFileName(index);
         cout << fileName << endl;//Grab the file, TODO: implement in a better way
-        grid = openFile(fileName);
+        grid = openFile(fileName);*/
 
         break;
     }
     case 'R':											// 'r','R': Reset the viewpoint
-    case 'r':
-        glMatrixMode(GL_MODELVIEW);
+        std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
+        grid = std::get<0>(tup);
+        fis[index] = std::get<1>(tup);
+
+        /*glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        zprInit(0, 0, 0);
+        zprInit(0, 0, 0);*/
+
         break;
+    }
     case 'D':
     case 'd':
     {
@@ -97,15 +107,106 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         renderer.setDrawingStyle((Renderer::DRAW_STYLE)drawing_style);
         break;
     }
+    case 'o':
+    {
+        fileName = "FilterOutput.csv";
+        fstream filtout;
+        filtout.open(fileName, ios::out);
+        filtout << "sep=," <<endl;
+        filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
+        for (int i = 0; i < 100; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+                continue;
+
+            filtout << i;
+            filtout << ",";
+            filtout << fi.cls;
+            filtout << ",";
+            filtout << fi.numFaces;
+            filtout << ",";
+            filtout << fi.numVertices;
+            filtout << ",";
+            filtout << fi.typeOfFace;
+            filtout << ",";
+            filtout << fi.minX;
+            filtout << ",";
+            filtout << fi.maxX;
+            filtout << ",";
+            filtout << fi.minY;
+            filtout << ",";
+            filtout << fi.maxY;
+            filtout << ",";
+            filtout << fi.minZ;
+            filtout << ",";
+            filtout << fi.maxZ;
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        filtout.close();
+        break;
     }
+    case 's':
+    {
+        cout << "Scanning..." << endl;
+        for (int i = 0; i < 100; i++) //TODO scan entire database
+        {
+            string fln = getFileName(i);
+            std::tuple<Grid*, FilterItem> tup = openFile("0/" + fln + "/" + fln + ".off");
+            fis[i] = std::get<1>(tup);
+        }
+        cout << "Scanning complete!" << endl;
+        break;
+    }
+    case 'l':
+    {
+        cout << "Loading from output file" << endl;
+        loadFilter();
+        break;
+    }
+
     glutPostRedisplay();
 }
 
-int main(int argc, char* argv[])
+void loadFilter()
 {
+    fstream filtin;
+    string line;
+    filtin.open("FilterOutput.csv", ios::in);
+    if (filtin)
+    {
+        getline(filtin, line);
+        getline(filtin, line);
+        while (!filtin.eof())
+        {
+            getline(filtin, line);
+            vector<string> vec = split(line, ',');
+            if (size(vec) == 0)
+                continue;
+            FilterItem fi;
+            fi.cls = vec[1];
+            fi.numFaces = stoi(vec[2]);
+            fi.numVertices = stoi(vec[3]);
+            fi.typeOfFace = vec[4];
+            fi.minX = stof(vec[5]);
+            fi.maxX = stof(vec[6]);
+            fi.minY = stof(vec[7]);
+            fi.maxY = stof(vec[8]);
+            fi.minZ = stof(vec[9]);
+            fi.maxZ = stof(vec[10]);
+            fis[stoi(vec[0])] = fi;
+        }
+        filtin.close();
+    }
+    else
+    {
+        cout << "No previous filter output found" << endl;
+    }
+}
 
-    /*fileName = getFileName(index);         
-    cout << fileName << endl;//Grab the file, TODO: implement in a better way*/
 
     string input;
     cout << "Please specify the file you want to view:" << endl;
@@ -113,6 +214,24 @@ int main(int argc, char* argv[])
     grid = openFile(input);
     grid->normalize();									//7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
     grid->computeFaceNormals();							//8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
+    grid->computeVertexNormals();
+
+int main(int argc, char* argv[])
+{
+    fis = new FilterItem[100];
+    loadFilter();
+
+    string input;
+    cout << "Please specify the file you want to view:" << endl;
+    cin >> input;
+
+    std::tuple<Grid*, FilterItem> tup = openFile(input);
+    grid = std::get<0>(tup);
+    fis[index] = std::get<1>(tup);
+
+    grid = openFile(input);
+    grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
+    grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
     grid->computeVertexNormals();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit

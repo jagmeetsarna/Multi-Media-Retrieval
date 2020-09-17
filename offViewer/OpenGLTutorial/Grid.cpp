@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+using namespace std;
+
 
 
 void Grid::getPoint(int i, float* p)
@@ -118,7 +120,7 @@ void Grid::computeFaceNormals()								//Compute face normals for the grid. For 
 	}
 }
 
-void Grid::computeVertexNormals()				//Compute vertex normals for the grid. For this, we add, to each vertex,
+void Grid::computeVertexNormals()							//Compute vertex normals for the grid. For this, we add, to each vertex,
 {															//the normals of all cells that use that vertex. Next, we normalize the result.
 	for (int i = 0; i < numCells(); ++i)
 	{
@@ -146,4 +148,13 @@ void Grid::computeVertexNormals()				//Compute vertex normals for the grid. For 
 }
 
 
+string Grid::getClass()
+{
+	return cls;
+}
+
+void Grid::setClass(string newcls)
+{
+	cls = newcls;
+}
 

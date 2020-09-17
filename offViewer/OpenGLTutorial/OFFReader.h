@@ -2,10 +2,15 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <tuple>
 #include "Grid.h"
-using namespace std;
+#include "FilterItem.h"
 
-Grid* openFile(string filename);								//Open the .off file and return the created grid
+std::tuple<Grid*, FilterItem> openFile(std::string filenames);								//Open the .off file and return the created grid
 bool file_exists(const char* fileName);								//Check if the file exists
+
 vector<string> split(string str, char delimiter);					//Split the lines of the file on the delimiter, returning a vector with the different string elements
 void readPlyFile(string fileName);
+
+//std::vector<std::string> split(std::string str, char delimiter);					//Split the lines of the file on the delimiter, returning a vector with the different string elements
+

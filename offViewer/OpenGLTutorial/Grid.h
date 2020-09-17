@@ -3,10 +3,10 @@
 #include <vector>
 #include "VectorAttributes.h"
 #include "ScalarAttributes.h"
+#include <stdio.h>
+#include <string>
 
 using namespace std;
-
-
 
 
 class Grid
@@ -36,6 +36,10 @@ public:
 
 	void setCell(int cell, vector<int> vertices);
 
+	void setClass(string newcls);
+
+	string getClass();
+
 	int	 getCell(int cell, int* vertices);
 
 	int findCell(float* p);
@@ -57,7 +61,6 @@ public:
 	}
 
 
-
 protected:
 
 	ScalarAttributes	scalars;
@@ -66,6 +69,11 @@ protected:
 	vector<int>			cells;
 	VectorAttributes    pointNormals;
 	VectorAttributes    faceNormals;
+
+	/*std::vector<float>	pointsX, pointsY, pointsZ;
+	std::vector<int>	cells;*/
+	std::string	cls;
+
 };
 
 
