@@ -24,7 +24,7 @@ typedef struct Face
 Grid* openFile(string fileName) {
 
 	int vertex_count, faces_count;
-	ifstream first_file(fileName);
+ 	ifstream first_file(fileName);
 
 	if (first_file) {
 		ifstream first_file(fileName);
@@ -45,7 +45,7 @@ Grid* openFile(string fileName) {
 		}
 		first_file.close();
 
-		ifstream offFile(fileName + ".off");
+		ifstream offFile(fileName);
 		getline(offFile, line);
 		line = "";
 

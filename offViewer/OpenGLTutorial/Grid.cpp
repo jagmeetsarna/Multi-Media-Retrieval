@@ -25,14 +25,27 @@ int	Grid::getCell(int cell, int* vertices)
 	vertices[1] = cells[3 * cell + 1];
 	vertices[2] = cells[3 * cell + 2];
 
+	/*int len = sizeof(vertices);
+
+	for (int i = 0; i < len; i++) {
+		cout << vertices[i] << endl;
+		vertices[i] = cells[len * cell + i];
+	}*/
+
 	return 3;
 }
 
 void Grid::setCell(int cell, vector<int> vertices)
 {
-	cells[3 * cell] = vertices[0];
+	/*cells[3 * cell] = vertices[0];
 	cells[3 * cell + 1] = vertices[1];
-	cells[3 * cell + 2] = vertices[2];
+	cells[3 * cell + 2] = vertices[2];*/
+
+	int len = vertices.size();
+	for (int i = 0; i < len; i++) {
+		cells[len * cell + i] = vertices[i];
+	}
+
 }
 
 void Grid::normalize()												//Normalize the grid in the [-1,1] cube

@@ -2,10 +2,12 @@
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <filesystem>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
 using namespace std;
+namespace fs = std::filesystem;
 
 string fileName;
 
@@ -102,8 +104,9 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 int main(int argc, char* argv[])
 {
 
-    fileName = getFileName(index);         
-    cout << fileName << endl;//Grab the file, TODO: implement in a better way
+    /*fileName = getFileName(index);         
+    cout << fileName << endl;//Grab the file, TODO: implement in a better way*/
+
     string input;
     cout << "Please specify the file you want to view:" << endl;
     cin >> input;
