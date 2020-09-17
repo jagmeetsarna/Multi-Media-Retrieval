@@ -3,11 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <tuple>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
 using namespace std;
+namespace fs = std::filesystem;
+void loadFilter();
 
 string fileName;
 
@@ -84,7 +87,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         filtout.open(fileName, ios::out);
         filtout << "sep=," <<endl;
         filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 250; i++)
         {
             FilterItem fi = fis[i];
 
@@ -122,13 +125,27 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     case 's':
     {
         cout << "Scanning..." << endl;
-        for (int i = 0; i < 100; i++) //TODO scan entire database
+        string location = "Sample_LabeledDB/";
+        string folder;
+        int i = 0;
+        for (const auto& entry : fs::directory_iterator(location))
         {
-            string fln = getFileName(i);
-            std::tuple<Grid*, FilterItem> tup = openFile("0/" + fln + "/" + fln + ".off");
-            fis[i] = std::get<1>(tup);
+            folder = entry.path().string();
+            cout << folder << endl;
+            for (const auto& fl : fs::directory_iterator(folder + "/"))
+            {
+                string file = fl.path().string();
+                cout << file << endl;
+                string suffix = ".off";
+                if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
+                    continue;
+                std::tuple<Grid*, FilterItem> tup = openFile(file);
+                FilterItem fi = std::get<1>(tup);
+                fi.cls = folder.substr(folder.find("/") + 1);
+                fis[i] = fi;
+                i++;
+            }
         }
-        cout << "Scanning complete!" << endl;
         break;
     }
     case 'l':
@@ -186,7 +203,7 @@ void loadFilter()
 
 int main(int argc, char* argv[])
 {
-    fis = new FilterItem[100];
+    fis = new FilterItem[250];
     loadFilter();
     fileName = getFileName(index);         
     cout << fileName << endl;//Grab the file, TODO: implement in a better way
