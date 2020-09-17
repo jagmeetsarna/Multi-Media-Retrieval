@@ -1,13 +1,13 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
+#include <filesystem>
 #include <iostream>
 #include <filesystem>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
 using namespace std;
-namespace fs = std::filesystem;
 
 string fileName;
 
