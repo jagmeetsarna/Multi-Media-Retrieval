@@ -6,12 +6,15 @@
 #include <filesystem>
 
 #include <fstream>
+#include <filesystem>
 #include <tuple>
 #include <string>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
 using namespace std;
+namespace fs = std::filesystem;
+void loadFilter();
 
 string fileName;
 
@@ -75,6 +78,107 @@ void mousemotion(int x, int y)							//Callback for mouse move events. We use th
     zprMotion(x, y);										//Pass the current location of the mouse to the ZPR library, to change the viewpoint.
 
     glutPostRedisplay();									//After each mouse move event, ask GLUT to redraw our window, so we see the viewpoint change.
+}
+
+
+void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
+{
+    switch (c)
+    {
+    case ' ':											    // space:   Toggle through the various drawing styles of the mesh renderer
+    {
+        index += 1;
+        fileName = getFileName(index);
+        cout << fileName << endl;//Grab the file, TODO: implement in a better way
+        std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
+        grid = std::get<0>(tup);
+        fis[index] = std::get<1>(tup);
+
+        break;
+    }
+    case 'o':
+    {
+        fileName = "FilterOutput.csv";
+        fstream filtout;
+        filtout.open(fileName, ios::out);
+        filtout << "sep=," <<endl;
+        filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
+        for (int i = 0; i < 250; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+                continue;
+
+            filtout << i;
+            filtout << ",";
+            filtout << fi.cls;
+            filtout << ",";
+            filtout << fi.numFaces;
+            filtout << ",";
+            filtout << fi.numVertices;
+            filtout << ",";
+            filtout << fi.typeOfFace;
+            filtout << ",";
+            filtout << fi.minX;
+            filtout << ",";
+            filtout << fi.maxX;
+            filtout << ",";
+            filtout << fi.minY;
+            filtout << ",";
+            filtout << fi.maxY;
+            filtout << ",";
+            filtout << fi.minZ;
+            filtout << ",";
+            filtout << fi.maxZ;
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        filtout.close();
+        break;
+    }
+    case 's':
+    {
+        cout << "Scanning..." << endl;
+        string location = "Sample_LabeledDB/";
+        string folder;
+        int i = 0;
+        for (const auto& entry : fs::directory_iterator(location))
+        {
+            folder = entry.path().string();
+            cout << folder << endl;
+            for (const auto& fl : fs::directory_iterator(folder + "/"))
+            {
+                string file = fl.path().string();
+                cout << file << endl;
+                string suffix = ".off";
+                if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
+                    continue;
+                std::tuple<Grid*, FilterItem> tup = openFile(file);
+                FilterItem fi = std::get<1>(tup);
+                fi.cls = folder.substr(folder.find("/") + 1);
+                fis[i] = fi;
+                i++;
+            }
+        }
+        break;
+    }
+    case 'l':
+    {
+        cout << "Loading from output file" << endl;
+        loadFilter();
+        break;
+    }
+    /*case 'R':											// 'r','R': Reset the viewpoint
+    case 'r':
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        zprInit(0, 0, 0);
+        break;
+    */
+    }
+    glutPostRedisplay();
 }
 
 void loadFilter()
@@ -213,7 +317,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 
 int main(int argc, char* argv[])
 {
-    fis = new FilterItem[100];
+    fis = new FilterItem[250];
     loadFilter();
 
     string input;
