@@ -1,4 +1,9 @@
 offViewer/OpenGLTutorial/db
+offViewer/.vs/
+offViewer/Debug
+offViewer/packages
+offViewer/OpenGLTutorial/Debug
+offViewer/OpenGLTutorial/x64
 offViewer/.vs/OpenGLTutorial/v16/.suo
 offViewer/.vs/OpenGLTutorial/v16/Browse.VC.db
 offViewer/.vs/OpenGLTutorial/v16/Browse.VC.db-shm

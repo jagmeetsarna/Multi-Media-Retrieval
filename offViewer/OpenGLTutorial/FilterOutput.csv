@@ -1,0 +1,3 @@
+sep=,
+index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value
+0,,10796,5400,triangles,-0.474662,0.60201,-0.975239,0.989709,-0.211997,0.119239

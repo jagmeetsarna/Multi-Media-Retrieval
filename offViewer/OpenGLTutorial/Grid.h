@@ -1,16 +1,18 @@
 #pragma once
 
 #include <vector>
+#include "VectorAttributes.h"
+#include "ScalarAttributes.h"
 #include <stdio.h>
 #include <string>
 
-
+using namespace std;
 
 
 class Grid
 {
 public:
-	Grid(int P, int C)															//Resize the array for the points and cells for the grid
+	Grid(int P, int C): scalars(P), pointNormals(P), faceNormals(C), pointsZ(P)															//Resize the array for the points and cells for the grid
 	{
 		pointsX.resize(P);
 		pointsY.resize(P);
@@ -30,23 +32,48 @@ public:
 
 	void getPoint(int i, float* p);
 
-	void setPoint(int i, std::vector<float> p);
+	void setPoint(int i, vector<float> p);
 
-	void setCell(int cell, std::vector<int> vertices);
+	void setCell(int cell, vector<int> vertices);
 
-	void setClass(std::string newcls);
+	void setClass(string newcls);
+
+	string getClass();
 
 	int	 getCell(int cell, int* vertices);
 
-	std::string getClass();
+	int findCell(float* p);
 
+	void normalize();
+
+	void computeFaceNormals();
+
+	void computeVertexNormals();
+
+	VectorAttributes& getFaceNormals()
+	{
+		return faceNormals;
+	}
+
+	VectorAttributes& getPointNormals()
+	{
+		return pointNormals;
+	}
 
 
 protected:
 
-	std::vector<float> pointsX, pointsY, pointsZ;
-	std::vector<int>	cells;
+	ScalarAttributes	scalars;
+
+	vector<float>		pointsX, pointsY, pointsZ;
+	vector<int>			cells;
+	VectorAttributes    pointNormals;
+	VectorAttributes    faceNormals;
+
+	/*std::vector<float>	pointsX, pointsY, pointsZ;
+	std::vector<int>	cells;*/
 	std::string	cls;
+
 };
 
 

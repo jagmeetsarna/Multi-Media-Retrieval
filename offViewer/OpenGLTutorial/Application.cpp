@@ -1,10 +1,14 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GLFW/glfw3.h>
+#include <filesystem>
 #include <iostream>
+#include <filesystem>
+
 #include <fstream>
 #include <filesystem>
 #include <tuple>
+#include <string>
 #include "OFFReader.h"
 #include "Renderer.h"
 #include "zpr.h"
@@ -14,9 +18,11 @@ void loadFilter();
 
 string fileName;
 
+int drawing_style = 0;
+
+
 Grid* grid = 0;
 Renderer renderer;
-GLFWwindow* window;
 
 FilterItem* fis;
 
@@ -31,13 +37,22 @@ void draw()												                //Render the 3D mesh (GLUT callback funct
     renderer.draw(*grid);
 }
 
-void viewing(int W, int H)								                //Window resize function, sets up viewing parameters (GLUT callback function)
-{                                                                       // TODO: THIS DOES NOT REALLY WORK RN
-    glMatrixMode(GL_PROJECTION);						                //1. Set the projection matrix
-    glLoadIdentity();
-    gluPerspective(fov, float(W) / H, z_near, z_far);
+void viewing(int W, int H)								//Window resize function, sets up viewing parameters (GLUT callback function)
+{
 
-    glViewport(0, 0, W, H);								                //2. Set the viewport to the entire size of the rendering window
+    if (H == 0)
+        H = 1;
+
+    float ratio = W * 1.0 / W;
+
+    glMatrixMode(GL_PROJECTION);						//1. Set the projection matrix
+    glLoadIdentity();
+    //gluPerspective(fov,float(W)/H,z_near,z_far);
+    gluPerspective(45, ratio, 1, 100);
+    glViewport(0, 0, W, H);
+    glMatrixMode(GL_MODELVIEW);
+
+    //glViewport(0,0,W,H);								//2. Set the viewport to the entire size of the rendering window
 }
 
 string getFileName(int index) {
@@ -64,6 +79,7 @@ void mousemotion(int x, int y)							//Callback for mouse move events. We use th
 
     glutPostRedisplay();									//After each mouse move event, ask GLUT to redraw our window, so we see the viewpoint change.
 }
+
 
 void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 {
@@ -197,24 +213,127 @@ void loadFilter()
     }
     else
     {
-        cout << "No previous filter output found" << endl;
+        std::cout << "No previous filter output found" << endl;
     }
+}
+
+void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
+{
+    switch (c)
+    {
+    case ' ':											    // space:   Toggle through the various drawing styles of the mesh renderer
+
+        /*index += 1;
+        fileName = getFileName(index);
+        cout << fileName << endl;//Grab the file, TODO: implement in a better way
+        grid = openFile(fileName);*/
+
+        break;
+
+    case 'R':
+    {                                           // 'r','R': Reset the viewpoint
+        tuple<Grid*, FilterItem> tup;
+        tup = openFile("0/" + fileName + "/" + fileName + ".off");
+        grid = std::get<0>(tup);
+        fis[index] = std::get<1>(tup);
+
+        /*glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        zprInit(0, 0, 0);*/
+
+        break;
+    }
+    case 'D':
+    case 'd':
+
+        drawing_style = (++drawing_style) % 4;
+        renderer.setDrawingStyle((Renderer::DRAW_STYLE)drawing_style);
+        break;
+
+    case 'o':
+    {
+    fileName = "FilterOutput.csv";
+    fstream filtout;
+    filtout.open(fileName, ios::out);
+    filtout << "sep=," << endl;
+    filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
+    for (int i = 0; i < 100; i++)
+    {
+        FilterItem fi = fis[i];
+
+        if (fi.typeOfFace == "")
+            continue;
+
+        filtout << i;
+        filtout << ",";
+        filtout << fi.cls;
+        filtout << ",";
+        filtout << fi.numFaces;
+        filtout << ",";
+        filtout << fi.numVertices;
+        filtout << ",";
+        filtout << fi.typeOfFace;
+        filtout << ",";
+        filtout << fi.minX;
+        filtout << ",";
+        filtout << fi.maxX;
+        filtout << ",";
+        filtout << fi.minY;
+        filtout << ",";
+        filtout << fi.maxY;
+        filtout << ",";
+        filtout << fi.minZ;
+        filtout << ",";
+        filtout << fi.maxZ;
+        filtout << endl;
+    }
+
+    std::cout << "Outputted!" << endl;
+    filtout.close();
+    break;
+    }
+    case 's':
+    {
+        std::cout << "Scanning..." << endl;
+        for (int i = 0; i < 100; i++) //TODO scan entire database
+        {
+            string fln = getFileName(i);
+            std::tuple<Grid*, FilterItem> tup = openFile("0/" + fln + "/" + fln + ".off");
+            fis[i] = std::get<1>(tup);
+        }
+        std::cout << "Scanning complete!" << endl;
+        break;
+    }
+    case 'l':
+    {
+        std::cout << "Loading from output file" << endl;
+        loadFilter();
+        break;
+    }
+    }
+
+    glutPostRedisplay();
 }
 
 int main(int argc, char* argv[])
 {
     fis = new FilterItem[250];
     loadFilter();
-    fileName = getFileName(index);         
-    cout << fileName << endl;//Grab the file, TODO: implement in a better way
-    std::tuple<Grid*, FilterItem> tup = openFile("0/" + fileName + "/" + fileName + ".off");
+
+    string input;
+    cout << "Please specify the file you want to view:" << endl;
+    cin >> input;
+
+    std::tuple<Grid*, FilterItem> tup = openFile(input);
     grid = std::get<0>(tup);
     fis[index] = std::get<1>(tup);
 
+    grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
+    grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
+    grid->computeVertexNormals();
+
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-
                                                                         //Ask GLUT to create next windows with a RGB framebuffer and a Z-buffer too
     glutInitWindowSize(500, 500);							            //Tell GLUT how large are the windows we want to create next
     glutCreateWindow(fileName.c_str());	                                //Create our window
@@ -225,6 +344,7 @@ int main(int argc, char* argv[])
     glutDisplayFunc(draw);								                //Add a drawing callback to the window
     //glutReshapeFunc(viewing);
     glutMainLoop();										                //Start the event loop that displays the graph and handles window-resize events
+
 
     return 0;
 }
