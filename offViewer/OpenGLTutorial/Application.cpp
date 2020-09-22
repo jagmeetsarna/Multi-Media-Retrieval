@@ -96,6 +96,12 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 
         break;
     }
+    case 'D':
+    case 'd':
+
+        drawing_style = (++drawing_style) % 4;
+        renderer.setDrawingStyle((Renderer::DRAW_STYLE)drawing_style);
+        break;
     case 'o':
     {
         fileName = "FilterOutput.csv";
@@ -217,16 +223,16 @@ void loadFilter()
     }
 }
 
-void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
+/*void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 {
     switch (c)
     {
     case ' ':											    // space:   Toggle through the various drawing styles of the mesh renderer
 
-        /*index += 1;
+        index += 1;
         fileName = getFileName(index);
         cout << fileName << endl;//Grab the file, TODO: implement in a better way
-        grid = openFile(fileName);*/
+        grid = openFile(fileName);
 
         break;
 
@@ -237,9 +243,9 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         grid = std::get<0>(tup);
         fis[index] = std::get<1>(tup);
 
-        /*glMatrixMode(GL_MODELVIEW);
+        glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        zprInit(0, 0, 0);*/
+        zprInit(0, 0, 0);
 
         break;
     }
@@ -313,7 +319,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     }
 
     glutPostRedisplay();
-}
+}*/
 
 int main(int argc, char* argv[])
 {
