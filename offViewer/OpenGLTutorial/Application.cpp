@@ -3,11 +3,13 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 #include <iostream>
+#include <io.h>
 #include <filesystem>
 
 #include <fstream>
 #include <filesystem>
 #include <tuple>
+#include <stdio.h>
 #include <string>
 #include "OFFReader.h"
 #include "Renderer.h"
@@ -19,6 +21,7 @@ void loadFilter();
 string fileName;
 
 int drawing_style = 0;
+const int FILTER_SIZE = 250;
 
 
 Grid* grid = 0;
@@ -80,6 +83,16 @@ void mousemotion(int x, int y)							//Callback for mouse move events. We use th
     glutPostRedisplay();									//After each mouse move event, ask GLUT to redraw our window, so we see the viewpoint change.
 }
 
+void mkdir(const char* dir)
+{
+    size_t size = strlen(dir) + 1;
+    wchar_t* ndb = new wchar_t[size];
+    size_t out;
+    mbstowcs_s(&out, ndb, size, dir, size - 1);
+    _wmkdir(ndb);
+    delete[] ndb;
+}
+
 
 void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 {
@@ -104,12 +117,12 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         break;
     case 'o':
     {
-        fileName = "FilterOutput.csv";
+        fileName = "FilterOutput_before.csv";
         fstream filtout;
         filtout.open(fileName, ios::out);
         filtout << "sep=," <<endl;
-        filtout << "index,class,number of faces, number of vertices, type of faces, minimun X value, maximum X value, minimun Y value, maximum Y value, minimum Z value, maximum Z value" << endl;
-        for (int i = 0; i < 250; i++)
+        filtout << "index,class,number of faces, number of vertices, type of faces, minimum X value, maximum X value, minimum Y value, maximum Y value, minimum Z value, maximum Z value, baricenter x coordinate, baricenter y coordinate, baricenter z coordinate, path, vertices verdict, volume" << endl;
+        for (int i = 0; i < FILTER_SIZE; i++)
         {
             FilterItem fi = fis[i];
 
@@ -137,6 +150,30 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             filtout << fi.minZ;
             filtout << ",";
             filtout << fi.maxZ;
+            filtout << ",";
+            filtout << fi.bX;
+            filtout << ",";
+            filtout << fi.bY;
+            filtout << ",";
+            filtout << fi.bZ;
+            filtout << ",";
+            filtout << fi.path;
+            filtout << ",";
+            if (fi.numVertices < 1000)
+            {
+                filtout << "TOO FEW VERTICES";
+                filtout << ",";
+            }
+            else if (fi.numVertices > 10000)
+            {
+                filtout << "TOO MANY VERTICES";
+                filtout << ",";
+            }
+            else
+            {
+                filtout << ",";
+            }
+            filtout << (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
             filtout << endl;
         }
 
@@ -157,23 +194,167 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             for (const auto& fl : fs::directory_iterator(folder + "/"))
             {
                 string file = fl.path().string();
-                cout << file << endl;
                 string suffix = ".off";
                 if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
                     continue;
-                std::tuple<Grid*, FilterItem> tup = openFile(file);
-                FilterItem fi = std::get<1>(tup);
+                cout << file << endl;
+                FilterItem fi = scanFile(file);
                 fi.cls = folder.substr(folder.find("/") + 1);
                 fis[i] = fi;
                 i++;
             }
         }
+        cout << "Scanning complete!" << endl;
         break;
     }
     case 'l':
     {
         cout << "Loading from output file" << endl;
         loadFilter();
+        break;
+    }
+    case 'n':
+    {
+        cout << "Normalizing current content..." << endl;
+
+        string s = "Normalized_DB";
+        mkdir(s.c_str());
+
+        for (int i = 0; i < FILTER_SIZE; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+            {
+                cout << i << endl;
+                cout << "No known face type!" << endl;
+                continue;
+            }
+
+            mkdir((s + "/" + fi.cls).c_str());
+            tuple<Grid*, FilterItem> tup = openFile("Sample_LabeledDB/" + fi.cls + "/" + fi.path);
+
+            Grid* g = get<0>(tup);
+            float volume = (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
+            float factor = cbrtf(volume);
+            fstream fs;
+            cout << s + "/" + fi.cls + "/" + fi.path << endl;
+            fs.open(s + "/" + fi.cls + "/" + fi.path, ios::out);
+            fs << "OFF" << endl;
+            fs << fi.numVertices << " ";
+            fs << fi.numFaces << " ";
+            fs << 0 << endl;
+
+            for (int j = 0; j < fi.numVertices; j++)
+            {
+                float* point = new float[3];
+                g->getPoint(j, point);
+
+                float fx = (point[0] - fi.bX) / factor;
+                float fy = (point[1] - fi.bY) / factor;
+                float fz = (point[2] - fi.bZ) / factor;
+
+                fs << fx << " " << fy << " " << fz << endl;
+            }
+
+            for (int j = 0; j < fi.numFaces; j++)
+            {
+                int* indices = new int[3];
+                g->getCell(j, indices);
+
+                fs << "3 " << indices[0] << " " << indices[1] << " " << indices[2] << endl;
+            }
+
+            fs.close();
+            delete g;
+        }
+
+        cout << "Normalizing complete!" << endl;
+        cout << "Scanning..." << endl;
+        string location = "Normalized_DB/";
+        string folder;
+        int i = 0;
+        for (const auto& entry : fs::directory_iterator(location))
+        {
+            folder = entry.path().string();
+            cout << folder << endl;
+            for (const auto& fl : fs::directory_iterator(folder + "/"))
+            {
+                string file = fl.path().string();
+                string suffix = ".off";
+                if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
+                    continue;
+                cout << file << endl;
+                FilterItem fi = scanFile(file);
+                fi.cls = folder.substr(folder.find("/") + 1);
+                fis[i] = fi;
+                i++;
+            }
+        }
+        cout << "Scanning complete!" << endl;
+
+        fileName = "FilterOutput_after.csv";
+        fstream filtout;
+        filtout.open(fileName, ios::out);
+        filtout << "sep=," << endl;
+        filtout << "index,class,number of faces, number of vertices, type of faces, minimum X value, maximum X value, minimum Y value, maximum Y value, minimum Z value, maximum Z value, baricenter x coordinate, baricenter y coordinate, baricenter z coordinate, path, vertices verdict, volume" << endl;
+        for (int i = 0; i < FILTER_SIZE; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+                continue;
+
+            filtout << i;
+            filtout << ",";
+            filtout << fi.cls;
+            filtout << ",";
+            filtout << fi.numFaces;
+            filtout << ",";
+            filtout << fi.numVertices;
+            filtout << ",";
+            filtout << fi.typeOfFace;
+            filtout << ",";
+            filtout << fi.minX;
+            filtout << ",";
+            filtout << fi.maxX;
+            filtout << ",";
+            filtout << fi.minY;
+            filtout << ",";
+            filtout << fi.maxY;
+            filtout << ",";
+            filtout << fi.minZ;
+            filtout << ",";
+            filtout << fi.maxZ;
+            filtout << ",";
+            filtout << fi.bX;
+            filtout << ",";
+            filtout << fi.bY;
+            filtout << ",";
+            filtout << fi.bZ;
+            filtout << ",";
+            filtout << fi.path;
+            if (fi.numVertices < 1000)
+            {
+                filtout << "TOO FEW VERTICES";
+                filtout << ",";
+            }
+            else if (fi.numVertices > 5000)
+            {
+                filtout << "TOO MANY VERTICES";
+                filtout << ",";
+            }
+            else
+            {
+                filtout << ",";
+            }
+            filtout << (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
+            filtout << ",";
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        filtout.close();
         break;
     }
     /*case 'R':											// 'r','R': Reset the viewpoint
@@ -191,7 +372,7 @@ void loadFilter()
 {
     fstream filtin;
     string line;
-    filtin.open("FilterOutput.csv", ios::in);
+    filtin.open("FilterOutput_after.csv", ios::in);
     if (filtin)
     {
         getline(filtin, line);
@@ -213,6 +394,10 @@ void loadFilter()
             fi.maxY = stof(vec[8]);
             fi.minZ = stof(vec[9]);
             fi.maxZ = stof(vec[10]);
+            fi.bX = stof(vec[11]);
+            fi.bY = stof(vec[12]);
+            fi.bZ = stof(vec[13]);
+            fi.path = vec[14];
             fis[stoi(vec[0])] = fi;
         }
         filtin.close();
@@ -323,7 +508,7 @@ void loadFilter()
 
 int main(int argc, char* argv[])
 {
-    fis = new FilterItem[250];
+    fis = new FilterItem[FILTER_SIZE];
     loadFilter();
 
     string input;
@@ -332,7 +517,7 @@ int main(int argc, char* argv[])
 
     std::tuple<Grid*, FilterItem> tup = openFile(input);
     grid = std::get<0>(tup);
-    fis[index] = std::get<1>(tup);
+    //fis[index] = std::get<1>(tup);
 
     grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
     grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
