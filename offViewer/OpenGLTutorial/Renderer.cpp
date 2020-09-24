@@ -33,10 +33,22 @@ void Renderer::draw(Grid& g_)								//Draw an unstructured grid, in the style i
 	case DRAW_C1_CELLS:
 		drawC1Cells(g);
 		break;
+
+	case DRAW_GRID_CELLS:
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 2);
+
+		drawC1Cells(g);
+		glColor3f(1, 1, 1);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		drawGrid(g);
+		glColor3f(0, 0, 0);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		drawGrid(g);
+		break;
 	}
-
-
 	glutSwapBuffers();
+	
 }
 
 

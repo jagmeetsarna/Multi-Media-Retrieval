@@ -15,7 +15,8 @@ public:
 		DRAW_GRID = 0,						//Draw the grid only. See the SimpleRenderer class.
 		DRAW_POINTS,						//Draw points only
 		DRAW_C0_CELLS,						//Draw cells, using flat shading
-		DRAW_C1_CELLS						//Draw cells, using smooth shading
+		DRAW_C1_CELLS,						//Draw cells, using smooth shading
+		DRAW_GRID_CELLS						//Draw cells with grid ontop
 	};
 
 	Renderer() : draw_style(DRAW_GRID) {}

@@ -99,7 +99,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     case 'D':
     case 'd':
 
-        drawing_style = (++drawing_style) % 4;
+        drawing_style = (++drawing_style) % 5;
         renderer.setDrawingStyle((Renderer::DRAW_STYLE)drawing_style);
         break;
     case 'o':
