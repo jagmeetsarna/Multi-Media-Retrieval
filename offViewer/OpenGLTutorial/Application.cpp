@@ -93,6 +93,99 @@ void mkdir(const char* dir)
     delete[] ndb;
 }
 
+void outputFilter(string fileName)
+{
+    fstream filtout;
+    filtout.open(fileName, ios::out);
+    filtout << "sep=," << endl;
+    filtout << "index,class,number of faces, number of vertices, type of faces, minimum X value, maximum X value, minimum Y value, maximum Y value, minimum Z value, maximum Z value, baricenter x coordinate, baricenter y coordinate, baricenter z coordinate, path, vertices verdict, volume" << endl;
+    for (int i = 0; i < FILTER_SIZE; i++)
+    {
+        FilterItem fi = fis[i];
+
+        if (fi.typeOfFace == "")
+            continue;
+
+        filtout << i;
+        filtout << ",";
+        filtout << fi.cls;
+        filtout << ",";
+        filtout << fi.numFaces;
+        filtout << ",";
+        filtout << fi.numVertices;
+        filtout << ",";
+        filtout << fi.typeOfFace;
+        filtout << ",";
+        filtout << fi.minX;
+        filtout << ",";
+        filtout << fi.maxX;
+        filtout << ",";
+        filtout << fi.minY;
+        filtout << ",";
+        filtout << fi.maxY;
+        filtout << ",";
+        filtout << fi.minZ;
+        filtout << ",";
+        filtout << fi.maxZ;
+        filtout << ",";
+        filtout << fi.bX;
+        filtout << ",";
+        filtout << fi.bY;
+        filtout << ",";
+        filtout << fi.bZ;
+        filtout << ",";
+        filtout << fi.path;
+        filtout << ",";
+        if (fi.numVertices < 1000)
+        {
+            filtout << "TOO FEW VERTICES";
+            filtout << ",";
+        }
+        else if (fi.numVertices > 10000)
+        {
+            filtout << "TOO MANY VERTICES";
+            filtout << ",";
+        }
+        else
+        {
+            filtout << ",";
+        }
+        filtout << (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
+        filtout << endl;
+    }
+
+    cout << "Outputted!" << endl;
+    filtout.close();
+}
+
+void scanFolder(string location)
+{
+    string folder;
+    int i = 0;
+    for (const auto& entry : fs::directory_iterator(location))
+    {
+        folder = entry.path().string();
+        cout << folder << endl;
+        for (const auto& fl : fs::directory_iterator(folder + "/"))
+        {
+            string file = fl.path().string();
+            string suffix = ".off";
+            if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
+                continue;
+            cout << file << endl;
+            FilterItem fi = scanFile(file);
+            int a = folder.find("/");
+            if (a <= folder.size())
+                fi.cls = folder.substr(folder.find("/") + 1);
+            else
+                fi.cls = folder.substr(folder.find("\\") + 1);
+            fis[i] = fi;
+            i++;
+        }
+    }
+    cout << "Scanning complete!" << endl;
+}
+
 
 void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 {
@@ -117,94 +210,18 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         break;
     case 'o':
     {
-        fileName = "FilterOutput_before.csv";
-        fstream filtout;
-        filtout.open(fileName, ios::out);
-        filtout << "sep=," <<endl;
-        filtout << "index,class,number of faces, number of vertices, type of faces, minimum X value, maximum X value, minimum Y value, maximum Y value, minimum Z value, maximum Z value, baricenter x coordinate, baricenter y coordinate, baricenter z coordinate, path, vertices verdict, volume" << endl;
-        for (int i = 0; i < FILTER_SIZE; i++)
-        {
-            FilterItem fi = fis[i];
-
-            if (fi.typeOfFace == "")
-                continue;
-
-            filtout << i;
-            filtout << ",";
-            filtout << fi.cls;
-            filtout << ",";
-            filtout << fi.numFaces;
-            filtout << ",";
-            filtout << fi.numVertices;
-            filtout << ",";
-            filtout << fi.typeOfFace;
-            filtout << ",";
-            filtout << fi.minX;
-            filtout << ",";
-            filtout << fi.maxX;
-            filtout << ",";
-            filtout << fi.minY;
-            filtout << ",";
-            filtout << fi.maxY;
-            filtout << ",";
-            filtout << fi.minZ;
-            filtout << ",";
-            filtout << fi.maxZ;
-            filtout << ",";
-            filtout << fi.bX;
-            filtout << ",";
-            filtout << fi.bY;
-            filtout << ",";
-            filtout << fi.bZ;
-            filtout << ",";
-            filtout << fi.path;
-            filtout << ",";
-            if (fi.numVertices < 1000)
-            {
-                filtout << "TOO FEW VERTICES";
-                filtout << ",";
-            }
-            else if (fi.numVertices > 10000)
-            {
-                filtout << "TOO MANY VERTICES";
-                filtout << ",";
-            }
-            else
-            {
-                filtout << ",";
-            }
-            filtout << (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
-            filtout << endl;
-        }
-
-        cout << "Outputted!" << endl;
-        filtout.close();
+        cout << "Please enter a name for the file" << endl;
+        string fileName;
+        cin >> fileName;
+        outputFilter(fileName);
         break;
     }
     case 's':
     {
-        cout << "Scanning..." << endl;
-        string location = "Sample_LabeledDB/";
-        string folder;
-        int i = 0;
-        for (const auto& entry : fs::directory_iterator(location))
-        {
-            folder = entry.path().string();
-            cout << folder << endl;
-            for (const auto& fl : fs::directory_iterator(folder + "/"))
-            {
-                string file = fl.path().string();
-                string suffix = ".off";
-                if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
-                    continue;
-                cout << file << endl;
-                FilterItem fi = scanFile(file);
-                fi.cls = folder.substr(folder.find("/") + 1);
-                fis[i] = fi;
-                i++;
-            }
-        }
-        cout << "Scanning complete!" << endl;
+        cout << "Please enter a folder to scan" << endl;
+        string fileName;
+        cin >> fileName;
+        scanFolder(fileName);
         break;
     }
     case 'l':
@@ -268,93 +285,10 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             fs.close();
             delete g;
         }
-
         cout << "Normalizing complete!" << endl;
-        cout << "Scanning..." << endl;
-        string location = "Normalized_DB/";
-        string folder;
-        int i = 0;
-        for (const auto& entry : fs::directory_iterator(location))
-        {
-            folder = entry.path().string();
-            cout << folder << endl;
-            for (const auto& fl : fs::directory_iterator(folder + "/"))
-            {
-                string file = fl.path().string();
-                string suffix = ".off";
-                if (!(file.size() >= suffix.size() && 0 == file.compare(file.size() - suffix.size(), suffix.size(), suffix)))
-                    continue;
-                cout << file << endl;
-                FilterItem fi = scanFile(file);
-                fi.cls = folder.substr(folder.find("/") + 1);
-                fis[i] = fi;
-                i++;
-            }
-        }
-        cout << "Scanning complete!" << endl;
 
-        fileName = "FilterOutput_after.csv";
-        fstream filtout;
-        filtout.open(fileName, ios::out);
-        filtout << "sep=," << endl;
-        filtout << "index,class,number of faces, number of vertices, type of faces, minimum X value, maximum X value, minimum Y value, maximum Y value, minimum Z value, maximum Z value, baricenter x coordinate, baricenter y coordinate, baricenter z coordinate, path, vertices verdict, volume" << endl;
-        for (int i = 0; i < FILTER_SIZE; i++)
-        {
-            FilterItem fi = fis[i];
-
-            if (fi.typeOfFace == "")
-                continue;
-
-            filtout << i;
-            filtout << ",";
-            filtout << fi.cls;
-            filtout << ",";
-            filtout << fi.numFaces;
-            filtout << ",";
-            filtout << fi.numVertices;
-            filtout << ",";
-            filtout << fi.typeOfFace;
-            filtout << ",";
-            filtout << fi.minX;
-            filtout << ",";
-            filtout << fi.maxX;
-            filtout << ",";
-            filtout << fi.minY;
-            filtout << ",";
-            filtout << fi.maxY;
-            filtout << ",";
-            filtout << fi.minZ;
-            filtout << ",";
-            filtout << fi.maxZ;
-            filtout << ",";
-            filtout << fi.bX;
-            filtout << ",";
-            filtout << fi.bY;
-            filtout << ",";
-            filtout << fi.bZ;
-            filtout << ",";
-            filtout << fi.path;
-            if (fi.numVertices < 1000)
-            {
-                filtout << "TOO FEW VERTICES";
-                filtout << ",";
-            }
-            else if (fi.numVertices > 5000)
-            {
-                filtout << "TOO MANY VERTICES";
-                filtout << ",";
-            }
-            else
-            {
-                filtout << ",";
-            }
-            filtout << (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
-            filtout << ",";
-            filtout << endl;
-        }
-
-        cout << "Outputted!" << endl;
-        filtout.close();
+        scanFolder("Normalized_DB");
+        outputFilter("FilterOutput_after.csv");
         break;
     }
     /*case 'R':											// 'r','R': Reset the viewpoint
