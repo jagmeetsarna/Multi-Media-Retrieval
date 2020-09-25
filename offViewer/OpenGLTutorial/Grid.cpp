@@ -147,6 +147,49 @@ void Grid::computeVertexNormals()							//Compute vertex normals for the grid. F
 	}
 }
 
+void Grid::computeCovarianceMatrix() {
+	double means[3] = { 0, 0, 0 };
+	vector<vector<float>> covarianceMatrix;
+	vector<vector<float>> points;
+
+	for (int i = 0; i < 3; i++) {
+		vector<float> entry;
+		for (int j = 0; j < 3; j++) {
+			entry.push_back(0.0f);
+		}
+		covarianceMatrix.push_back(entry);
+	}
+
+	for (int i = 0; i < pointsX.size(); i++) {
+		means[0] += pointsX[i];
+		means[1] += pointsY[i];
+		means[2] += pointsZ[i];
+		vector<float> point;
+
+		point.push_back(pointsX[i]);
+		point.push_back(pointsY[i]);
+		point.push_back(pointsZ[i]);
+		points.push_back(point);
+	}
+		
+	means[0] /= points.size(), means[1] /= points.size(), means[2] /= points.size();
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			covarianceMatrix[i][j] = 0.0f;
+			for (int k = 0; k < points.size(); k++)
+				covarianceMatrix[i][j] += (means[i] - points[k][i]) *
+				(means[j] - points[k][j]);
+			covarianceMatrix[i][j] /= points.size() - 1;
+			cout << covarianceMatrix[i][j];
+			cout << ";";
+		}
+		cout << endl;
+	}
+
+
+}
+
 
 string Grid::getClass()
 {

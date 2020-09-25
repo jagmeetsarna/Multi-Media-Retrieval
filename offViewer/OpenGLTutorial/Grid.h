@@ -50,6 +50,8 @@ public:
 
 	void computeVertexNormals();
 
+	void computeCovarianceMatrix();
+
 	VectorAttributes& getFaceNormals()
 	{
 		return faceNormals;
