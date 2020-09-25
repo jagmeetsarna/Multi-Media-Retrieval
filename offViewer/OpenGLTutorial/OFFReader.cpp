@@ -45,7 +45,7 @@ std::tuple<Grid*, FilterItem> openFile(string fileName)
 		}
 		if (line == "ply") {										//If the file is in the .ply format, we use a differnet function
 			
-			readPlyFile(fileName);
+			fileName = readPlyFile(fileName);
 
 		}
 		first_file.close();
@@ -144,13 +144,14 @@ std::tuple<Grid*, FilterItem> openFile(string fileName)
 
 }
 
-void readPlyFile(string fileName) {
+string readPlyFile(string fileName) {
 
 	int vertex_count = 0;
 	int faces_count = 0;
 
 	ifstream ply_file(fileName);
-	ofstream off_file(fileName + ".off");
+	string new_name = fileName.substr(0, fileName.find(".ply"));
+	ofstream off_file(new_name + ".off");
 
 	string ply_line;
 
@@ -171,7 +172,7 @@ void readPlyFile(string fileName) {
 	
 	}
 	off_file << "OFF" << endl;
-	off_file << to_string(vertex_count) + " " + to_string(faces_count) << endl;
+	off_file << to_string(vertex_count) + " " + to_string(faces_count)  + " 0" << endl;
 	while (getline(ply_file, ply_line)) {
 		off_file << ply_line << endl;
 	}
@@ -179,8 +180,7 @@ void readPlyFile(string fileName) {
 	off_file.close();
 	ply_file.close();
 
-
-
+	return (new_name + ".off");
 
 }
 
