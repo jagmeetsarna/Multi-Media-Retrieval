@@ -354,7 +354,7 @@ int main(int argc, char* argv[])
 
     std::tuple<Grid*, FilterItem> tup = openFile(input);
     grid = std::get<0>(tup);
-    //fis[index] = std::get<1>(tup);
+    fis[index] = std::get<1>(tup);
 
     grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
     grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.

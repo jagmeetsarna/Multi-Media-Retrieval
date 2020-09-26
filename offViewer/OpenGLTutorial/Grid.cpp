@@ -199,14 +199,12 @@ void Grid::computeEigenvectors() {
 	cout << eig.eigenvalues() << endl;
 	cout << "Eigenvectors: ";
 	cout << eig.eigenvectors() << endl << endl;
-	cout << "Col0";
-	cout << eig.eigenvectors().rightCols(0) << endl << endl;
-	cout << "Col1";
-	cout << eig.eigenvectors().rightCols(1) << endl << endl;
-	cout << "Col2";
-	cout << eig.eigenvectors().rightCols(2) << endl << endl;
-	cout << "Col3";
-	cout << eig.eigenvectors().rightCols(3) << endl << endl;
+	cout << "1";
+	cout << eig.eigenvectors()[0] << endl << endl;
+	cout << "2";
+	cout << eig.eigenvectors()[1] << endl << endl;
+	cout << "3";
+	cout << eig.eigenvectors()[2] << endl << endl;
 
 }
 
