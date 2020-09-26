@@ -252,8 +252,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             tuple<Grid*, FilterItem> tup = openFile("Sample_LabeledDB/" + fi.cls + "/" + fi.path);
 
             Grid* g = get<0>(tup);
-            float volume = (fi.maxX - fi.minX) * (fi.maxY - fi.minY) * (fi.maxZ - fi.minZ);
-            float factor = cbrtf(volume);
+            float factor = max((fi.maxX - fi.minX), max((fi.maxY - fi.minY), (fi.maxZ - fi.minZ)));
             fstream fs;
             cout << s + "/" + fi.cls + "/" + fi.path << endl;
             fs.open(s + "/" + fi.cls + "/" + fi.path, ios::out);

@@ -276,7 +276,7 @@ FilterItem scanFile(string fileName)
 	}
 }
 
-void readPlyFile(string fileName) {
+string readPlyFile(string fileName) {
 
 	int vertex_count = 0;
 	int faces_count = 0;
