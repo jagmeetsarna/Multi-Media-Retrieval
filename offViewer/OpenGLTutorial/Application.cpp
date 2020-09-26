@@ -360,6 +360,7 @@ int main(int argc, char* argv[])
     grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
     grid->computeVertexNormals();
     grid->computeCovarianceMatrix();
+    grid->computeEigenvectors();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

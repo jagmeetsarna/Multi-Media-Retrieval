@@ -53,6 +53,8 @@ public:
 
 	void computeCovarianceMatrix();
 
+	void computeEigenvectors();
+
 	VectorAttributes& getFaceNormals()
 	{
 		return faceNormals;
@@ -63,12 +65,27 @@ public:
 		return pointNormals;
 	}
 
+	Eigen::Matrix3f& getCovarianceMatrix() {
+		return covarianceMatrix;
+	}
+
+	vector<vector<float>> getEigenvectors() {
+		vector<vector<float>> vectors;
+		vectors.push_back(eigenVec1);
+		vectors.push_back(eigenVec2);
+		vectors.push_back(eigenVec3);
+
+		return vectors;
+	}
+
 
 protected:
 
 	ScalarAttributes	scalars;
 
 	Eigen::Matrix3f		covarianceMatrix;
+
+	vector<float>		eigenVec1, eigenVec2, eigenVec3;
 
 	vector<float>		pointsX, pointsY, pointsZ;
 	vector<int>			cells;

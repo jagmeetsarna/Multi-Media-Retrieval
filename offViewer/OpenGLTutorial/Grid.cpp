@@ -45,7 +45,7 @@ void Grid::setCell(int cell, vector<int> vertices)
 
 	int len = vertices.size();
 	for (int i = 0; i < len; i++) {
-		cells[len * cell + i] = vertices[i];
+		cells[3 * cell + i] = vertices[i];
 	}
 
 }
@@ -189,8 +189,24 @@ void Grid::computeCovarianceMatrix() {
 	covarianceMatrix << covariance[0][0], covariance[0][1], covariance[0][2],
 		covariance[1][0], covariance[1][1], covariance[1][2],
 		covariance[2][0], covariance[2][1], covariance[2][2];
-	//cout << covarianceMatrix << endl;
+	cout << covarianceMatrix << endl;
+}
 
+void Grid::computeEigenvectors() {
+
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
+	cout << "Eigenvalues: ";
+	cout << eig.eigenvalues() << endl;
+	cout << "Eigenvectors: ";
+	cout << eig.eigenvectors() << endl << endl;
+	cout << "Col0";
+	cout << eig.eigenvectors().rightCols(0) << endl << endl;
+	cout << "Col1";
+	cout << eig.eigenvectors().rightCols(1) << endl << endl;
+	cout << "Col2";
+	cout << eig.eigenvectors().rightCols(2) << endl << endl;
+	cout << "Col3";
+	cout << eig.eigenvectors().rightCols(3) << endl << endl;
 
 }
 
