@@ -200,11 +200,11 @@ void Grid::computeEigenvectors() {
 	cout << "Eigenvectors: ";
 	cout << eig.eigenvectors() << endl << endl;
 	cout << "1";
-	cout << eig.eigenvectors()[0] << endl << endl;
+	cout << eig.eigenvectors() << endl << endl;
 	cout << "2";
-	cout << eig.eigenvectors()[1] << endl << endl;
+	cout << eig.eigenvectors() << endl << endl;
 	cout << "3";
-	cout << eig.eigenvectors()[2] << endl << endl;
+	cout << eig.eigenvectors() << endl << endl;
 
 }
 
