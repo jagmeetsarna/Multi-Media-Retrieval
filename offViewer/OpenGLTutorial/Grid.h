@@ -5,6 +5,7 @@
 #include "ScalarAttributes.h"
 #include <stdio.h>
 #include <string>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -67,13 +68,12 @@ protected:
 
 	ScalarAttributes	scalars;
 
+	Eigen::Matrix3f		covarianceMatrix;
+
 	vector<float>		pointsX, pointsY, pointsZ;
 	vector<int>			cells;
 	VectorAttributes    pointNormals;
 	VectorAttributes    faceNormals;
-
-	/*std::vector<float>	pointsX, pointsY, pointsZ;
-	std::vector<int>	cells;*/
 	std::string	cls;
 
 };
