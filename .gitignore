@@ -348,3 +348,4 @@ $RECYCLE.BIN/
 offViewer/x64/Debug/OpenGLTutorial.exe
 offViewer/x64/Debug/OpenGLTutorial.ilk
 offViewer/x64/Debug/OpenGLTutorial.pdb
+*.csv
