@@ -2,7 +2,22 @@
 #include "Grid.h"
 #include <GL/glut.h>										//GLUT library
 
+void Renderer::drawAxis() {
+	glBegin(GL_LINES);
 
+	glColor3f(1.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(4.0, 0.0, 0.0);
+
+	glColor3f(0.0, 1.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 4.0, 0.0);
+
+	glColor3f(0.0, 0.0, 1.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, 4.0);
+	glEnd();
+}
 
 void Renderer::draw(Grid& g_)								//Draw an unstructured grid, in the style indicated by 'drawing_style'
 {
@@ -13,10 +28,27 @@ void Renderer::draw(Grid& g_)								//Draw an unstructured grid, in the style i
 															//This is required to get correct shading for various model scales.
 
 	Grid& g = (Grid&)g_;
+	vector<Point3d> centroids;
 
 	switch (draw_style)										//Render the grid, based on the current drawing style
 	{														//Currently only implemented the grid version
 	case DRAW_GRID:
+		drawAxis();
+
+		// //
+		/*glColor3f(0.3, 0.3, 0.3);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+		glShadeModel(GL_SMOOTH);
+		glPointSize(3);
+		centroids = g.getCellCentroids();
+		glBegin(GL_POINTS);
+		for (int i = 0; i < centroids.size(); i++) {
+			glVertex3f(centroids[i].x, centroids[i].y, centroids[i].z);
+		}*/
+		// //
+
 		glColor3f(1, 1, 1);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		drawGrid(g);
@@ -25,16 +57,22 @@ void Renderer::draw(Grid& g_)								//Draw an unstructured grid, in the style i
 		drawGrid(g);
 		break;
 	case DRAW_POINTS:
+
+		drawAxis();
 		drawPoints(g);
 		break;
 	case DRAW_C0_CELLS:
+		drawAxis();
 		drawC0Cells(g);
 		break;
 	case DRAW_C1_CELLS:
+		drawAxis();
 		drawC1Cells(g);
 		break;
 
 	case DRAW_GRID_CELLS:
+
+		drawAxis();
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0, 2);
 
@@ -55,6 +93,7 @@ void Renderer::draw(Grid& g_)								//Draw an unstructured grid, in the style i
 
 void Renderer::drawGrid(Grid& g)							//Draw 'g' without shading
 {
+
 	glDisable(GL_LIGHTING);
 
 	for (int i = 0; i < g.numCells(); ++i)					//Draw all cells in the grid
@@ -92,6 +131,7 @@ void Renderer::drawPoints(Grid& g)	//Draw 'g' as a point cloud
 	VectorAttributes& point_normals = g.getPointNormals();
 
 	glBegin(GL_POINTS);									//2.   Draw vertices as an OpenGL point-set	
+
 	for (int i = 0; i < g.numPoints(); ++i)
 	{
 		float v[3];

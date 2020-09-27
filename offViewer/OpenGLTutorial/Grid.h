@@ -78,6 +78,16 @@ public:
 		return vectors;
 	}
 
+	vector<Point3d> getCellCentroids();
+
+	void momentTest();
+
+	int sgn(float x) {
+		if (x > 0) return 1;
+		if (x < 0) return -1;
+		return 0;
+	}
+
 
 protected:
 
@@ -86,6 +96,8 @@ protected:
 	Eigen::Matrix3f		covarianceMatrix;
 
 	vector<float>		eigenVec1, eigenVec2, eigenVec3;
+
+	vector<Point3d>		cellCentroids;
 
 	vector<float>		pointsX, pointsY, pointsZ;
 	vector<int>			cells;

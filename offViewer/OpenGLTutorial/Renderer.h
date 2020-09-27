@@ -27,6 +27,7 @@ public:
 	{
 		draw_style = s;
 	}
+	void drawAxis();
 
 protected:
 
