@@ -291,7 +291,6 @@ void Grid::PCARotation() {
 		pointsX[i] = newPoint.x;
 		pointsY[i] = newPoint.y;
 		pointsZ[i] = newPoint.z;
-
 	}
 
 
