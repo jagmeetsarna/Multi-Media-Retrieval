@@ -290,13 +290,9 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         outputFilter("FilterOutput_after.csv");
         break;
     }
-    /*case 'R':											// 'r','R': Reset the viewpoint
-    case 'r':
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        zprInit(0, 0, 0);
-        break;
-    */
+    case 't': {
+        grid->momentTest();
+    }
     }
     glutPostRedisplay();
 }
@@ -352,11 +348,13 @@ int main(int argc, char* argv[])
 
     std::tuple<Grid*, FilterItem> tup = openFile(input);
     grid = std::get<0>(tup);
-    //fis[index] = std::get<1>(tup);
+    fis[index] = std::get<1>(tup);
 
     grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
-    grid->computeFaceNormals();							                //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
+    grid->computeFaceNormals();							                    //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
     grid->computeVertexNormals();
+    //grid->computeCovarianceMatrix();
+    //grid->computeEigenvectors();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -367,7 +365,7 @@ int main(int argc, char* argv[])
     glutMouseFunc(mouseclick);							                //Bind the mouse click and mouse drag (click-and-move) events to callbacks. This allows us
     glutMotionFunc(mousemotion);
     glutKeyboardFunc(keyboard);
-    glutDisplayFunc(draw);								                //Add a drawing callback to the window
+    glutDisplayFunc(draw);
     //glutReshapeFunc(viewing);
     glutMainLoop();										                //Start the event loop that displays the graph and handles window-resize events
 

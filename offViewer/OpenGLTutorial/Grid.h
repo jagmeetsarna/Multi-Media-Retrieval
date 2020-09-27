@@ -5,6 +5,7 @@
 #include "ScalarAttributes.h"
 #include <stdio.h>
 #include <string>
+#include <Eigen/Dense>
 
 using namespace std;
 
@@ -50,6 +51,10 @@ public:
 
 	void computeVertexNormals();
 
+	void computeCovarianceMatrix();
+
+	void computeEigenvectors();
+
 	VectorAttributes& getFaceNormals()
 	{
 		return faceNormals;
@@ -60,18 +65,44 @@ public:
 		return pointNormals;
 	}
 
+	Eigen::Matrix3f& getCovarianceMatrix() {
+		return covarianceMatrix;
+	}
+
+	vector<vector<float>> getEigenvectors() {
+		vector<vector<float>> vectors;
+		vectors.push_back(eigenVec1);
+		vectors.push_back(eigenVec2);
+		vectors.push_back(eigenVec3);
+
+		return vectors;
+	}
+
+	vector<Point3d> getCellCentroids();
+
+	void momentTest();
+
+	int sgn(float x) {
+		if (x > 0) return 1;
+		if (x < 0) return -1;
+		return 0;
+	}
+
 
 protected:
 
 	ScalarAttributes	scalars;
 
+	Eigen::Matrix3f		covarianceMatrix;
+
+	vector<float>		eigenVec1, eigenVec2, eigenVec3;
+
+	vector<Point3d>		cellCentroids;
+
 	vector<float>		pointsX, pointsY, pointsZ;
 	vector<int>			cells;
 	VectorAttributes    pointNormals;
 	VectorAttributes    faceNormals;
-
-	/*std::vector<float>	pointsX, pointsY, pointsZ;
-	std::vector<int>	cells;*/
 	std::string	cls;
 
 };

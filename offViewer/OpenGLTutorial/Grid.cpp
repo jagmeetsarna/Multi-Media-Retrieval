@@ -45,7 +45,7 @@ void Grid::setCell(int cell, vector<int> vertices)
 
 	int len = vertices.size();
 	for (int i = 0; i < len; i++) {
-		cells[len * cell + i] = vertices[i];
+		cells[3 * cell + i] = vertices[i];
 	}
 
 }
@@ -145,6 +145,124 @@ void Grid::computeVertexNormals()							//Compute vertex normals for the grid. F
 		point_normal.normalize();
 		pointNormals.setC0Vector(i, point_normal.data);
 	}
+}
+
+void Grid::computeCovarianceMatrix() {
+	double means[3] = { 0, 0, 0 };
+	vector<vector<float>> covariance;
+	vector<vector<float>> points;
+
+	for (int i = 0; i < 3; i++) {
+		vector<float> entry;
+		for (int j = 0; j < 3; j++) {
+			entry.push_back(0.0f);
+		}
+		covariance.push_back(entry);
+	}
+
+	for (int i = 0; i < pointsX.size(); i++) {
+		means[0] += pointsX[i];
+		means[1] += pointsY[i];
+		means[2] += pointsZ[i];
+		vector<float> point;
+
+		point.push_back(pointsX[i]);
+		point.push_back(pointsY[i]);
+		point.push_back(pointsZ[i]);
+		points.push_back(point);
+	}
+		
+	means[0] /= points.size(), means[1] /= points.size(), means[2] /= points.size();
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			covariance[i][j] = 0.0f;
+			for (int k = 0; k < points.size(); k++)
+				covariance[i][j] += (means[i] - points[k][i]) *
+				(means[j] - points[k][j]);
+			covariance[i][j] /= points.size() - 1;
+			//cout << covariance[i][j];
+			//cout << ";";
+		}
+		//cout << endl;
+	}
+	covarianceMatrix << covariance[0][0], covariance[0][1], covariance[0][2],
+		covariance[1][0], covariance[1][1], covariance[1][2],
+		covariance[2][0], covariance[2][1], covariance[2][2];
+	//cout << covarianceMatrix << endl;
+}
+
+void Grid::computeEigenvectors() {
+
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
+	cout << "Eigenvalues: ";
+	cout << eig.eigenvalues() << endl;
+	cout << "Eigenvectors: ";
+	cout << eig.eigenvectors() << endl << endl;
+
+}
+
+vector<Point3d> Grid::getCellCentroids() {
+
+	vector<Point3d> centroids;
+	cellCentroids.clear();
+
+	for (int i = 0; i < numCells(); ++i)
+	{
+		int cell[10];
+		int size = getCell(i, cell);
+
+		Point3d points[10];
+		Point3d centroid;
+		for (int j = 0; j < size; ++j)
+		{
+			float p[3];
+			getPoint(cell[j], p);
+			centroid.x += Point3d(p).x;
+			centroid.y += Point3d(p).y;
+			centroid.z += Point3d(p).z;
+		}
+		centroid.x /= size;
+		centroid.y /= size;
+		centroid.z /= size;
+		cellCentroids.push_back(centroid);
+		centroids.push_back(centroid);
+	}
+
+	return centroids;
+}
+
+void Grid::momentTest() {
+
+	Eigen::Matrix3i F;
+
+	getCellCentroids();
+
+	float fX = 0;
+	float fY = 0;
+	float fZ = 0;
+
+	for (int i = 0; i < numCells(); i++) {
+
+		fX += (sgn(cellCentroids[i].x) * pow(cellCentroids[i].x, 2));
+		fY += (sgn(cellCentroids[i].y) * pow(cellCentroids[i].y, 2));
+		fZ += (sgn(cellCentroids[i].z) * pow(cellCentroids[i].z, 2));
+	}
+
+	for (int i = 0; i < numPoints(); i++) {
+		if (sgn(fX) != 0)	pointsX[i] *= sgn(fX);
+		if (sgn(fY) != 0)	pointsY[i] *= sgn(fY);
+		if (sgn(fZ) != 0)	pointsZ[i] *= sgn(fZ);
+	}
+
+	F << sgn(fX), 0, 0,
+		0, sgn(fY), 0,
+		0, 0, sgn(fZ);
+
+	cout << sgn(fX) << endl;
+	cout << sgn(fY) << endl;
+	cout << sgn(fZ) << endl;
+
 }
 
 

@@ -13,12 +13,12 @@ using namespace std;
 
 typedef struct Vertex
 {
-	float x, y, z;             /* the usual 3-space position of a vertex */
+	float x, y, z;					/* the usual 3-space position of a vertex */
 } Vertex;
 
 typedef struct Face
 {
-	unsigned char nverts;    /* number of vertex indices in list */
+	unsigned char nverts;			/* number of vertex indices in list */
 	vector<int> verts;              /* vertex index list */
 } Face;
 
