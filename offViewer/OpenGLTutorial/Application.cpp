@@ -270,10 +270,10 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
                 float fy = (point[1] - fi.bY) / factor;
                 float fz = (point[2] - fi.bZ) / factor;
 
-                // fs << fx << " " << fy << " " << fz << endl;
+                //fs << fx << " " << fy << " " << fz << endl;
 
-                // HERE GOES THE FUNCTION FOR THE PCA ROTATION
-                //g->momentTest();                            // FUNCTION FOR THE MOMENT TEST
+                //grid->PCARotation();                          // HERE GOES THE FUNCTION FOR THE PCA ROTATION
+                //g->momentTest();                              // FUNCTION FOR THE MOMENT TEST
             }
 
             //Write the new points into the file.
@@ -310,6 +310,13 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     }
     case 't': {
         grid->momentTest();
+        grid->computeFaceNormals();
+        grid->computeVertexNormals();
+    }
+    case 'p': {
+        grid->PCARotation();
+        grid->computeFaceNormals();
+        grid->computeVertexNormals();
     }
     }
     glutPostRedisplay();
@@ -368,9 +375,8 @@ int main(int argc, char* argv[])
     grid = std::get<0>(tup);
     fis[index] = std::get<1>(tup);
 
+    grid->computeFaceNormals();
     grid->computeVertexNormals();
-    //grid->computeCovarianceMatrix();
-    //grid->computeEigenvectors();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);

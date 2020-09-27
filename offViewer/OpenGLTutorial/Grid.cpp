@@ -148,6 +148,7 @@ void Grid::computeVertexNormals()							//Compute vertex normals for the grid. F
 }
 
 void Grid::computeCovarianceMatrix() {
+
 	double means[3] = { 0, 0, 0 };
 	vector<vector<float>> covariance;
 	vector<vector<float>> points;
@@ -193,6 +194,8 @@ void Grid::computeCovarianceMatrix() {
 }
 
 void Grid::computeEigenvectors() {
+
+	computeCovarianceMatrix();
 
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
 	cout << "Eigenvalues: ";
@@ -262,6 +265,35 @@ void Grid::momentTest() {
 	cout << sgn(fX) << endl;
 	cout << sgn(fY) << endl;
 	cout << sgn(fZ) << endl;
+
+}
+
+void Grid::PCARotation() {
+	computeCovarianceMatrix();
+	computeEigenvectors();
+	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
+	vector<float> vec1, vec2, vec3;
+#
+	for (int i = 0; i < 3; i++) {
+		vec1.push_back(eig.eigenvectors().col(0)(i));
+		vec2.push_back(eig.eigenvectors().col(1)(i));
+		vec3.push_back(eig.eigenvectors().col(2)(i));
+	}
+
+
+	for (int i = 0; i < numPoints(); i++) {
+
+		Point3d newPoint;
+		newPoint.x = (vec3[0] * pointsX[i] + vec3[1] * pointsY[i] + vec3[2] * pointsZ[i]);
+		newPoint.y = (vec2[0] * pointsX[i] + vec2[1] * pointsY[i] + vec2[2] * pointsZ[i]);
+		newPoint.z = (vec1[0] * pointsX[i] + vec1[1] * pointsY[i] + vec1[2] * pointsZ[i]);
+
+		pointsX[i] = newPoint.x;
+		pointsY[i] = newPoint.y;
+		pointsZ[i] = newPoint.z;
+
+	}
+
 
 }
 
