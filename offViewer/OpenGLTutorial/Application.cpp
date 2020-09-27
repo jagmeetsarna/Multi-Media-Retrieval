@@ -270,8 +270,26 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
                 float fy = (point[1] - fi.bY) / factor;
                 float fz = (point[2] - fi.bZ) / factor;
 
+                // fs << fx << " " << fy << " " << fz << endl;
+
+                // HERE GOES THE FUNCTION FOR THE PCA ROTATION
+                //g->momentTest();                            // FUNCTION FOR THE MOMENT TEST
+            }
+
+            //Write the new points into the file.
+            for (int j = 0; j < g->numPoints(); j++)
+            {
+                float* point = new float[3];
+                g->getPoint(j, point);
+
+                float fx = point[0];
+                float fy = point[1];
+                float fz = point[2];
+
                 fs << fx << " " << fy << " " << fz << endl;
             }
+
+
 
             for (int j = 0; j < fi.numFaces; j++)
             {
@@ -350,8 +368,6 @@ int main(int argc, char* argv[])
     grid = std::get<0>(tup);
     fis[index] = std::get<1>(tup);
 
-    grid->normalize();									                //7.  Normalize the mesh in the [-1,1] cube. This makes setting the OpenGL projection easier.
-    grid->computeFaceNormals();							                    //8.  Compute face and vertex normals for the mesh. This allows us to shade the mesh next.
     grid->computeVertexNormals();
     //grid->computeCovarianceMatrix();
     //grid->computeEigenvectors();
