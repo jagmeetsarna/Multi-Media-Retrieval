@@ -252,10 +252,14 @@ void Grid::momentTest() {
 		fZ += (sgn(cellCentroids[i].z) * pow(cellCentroids[i].z, 2));
 	}
 
+	cout << sgn(fX) << endl;
+	cout << sgn(fY) << endl;
+	cout << sgn(fZ) << endl;
+
 	for (int i = 0; i < numPoints(); i++) {
-		if (sgn(fX) != 0)	pointsX[i] *= sgn(fX);
-		if (sgn(fY) != 0)	pointsY[i] *= sgn(fY);
-		if (sgn(fZ) != 0)	pointsZ[i] *= sgn(fZ);
+		pointsX[i] = sgn(fX) * pointsX[i];
+		pointsY[i] = sgn(fY) * pointsY[i];
+		pointsZ[i] = sgn(fZ) * pointsZ[i];
 	}
 
 	F << sgn(fX), 0, 0,
@@ -273,7 +277,7 @@ void Grid::PCARotation() {
 	computeEigenvectors();
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
 	vector<float> vec1, vec2, vec3;
-#
+
 	for (int i = 0; i < 3; i++) {
 		vec1.push_back(eig.eigenvectors().col(0)(i));
 		vec2.push_back(eig.eigenvectors().col(1)(i));
@@ -284,9 +288,19 @@ void Grid::PCARotation() {
 	for (int i = 0; i < numPoints(); i++) {
 
 		Point3d newPoint;
-		newPoint.x = (vec3[0] * pointsX[i] + vec3[1] * pointsY[i] + vec3[2] * pointsZ[i]);
+
+		newPoint.x = (vec1[0] * pointsX[i] + vec1[1] * pointsY[i] + vec1[2] * pointsZ[i]);
 		newPoint.y = (vec2[0] * pointsX[i] + vec2[1] * pointsY[i] + vec2[2] * pointsZ[i]);
-		newPoint.z = (vec1[0] * pointsX[i] + vec1[1] * pointsY[i] + vec1[2] * pointsZ[i]);
+
+
+		//vec3 = crossproduct of vec1 and vec2
+		/*vec1[0] = vec3[1] * vec2[2] - vec3[2] * vec2[1];
+		vec1[0] = vec3[2] * vec2[0] - vec3[0] * vec2[2];
+		vec1[0] = vec3[0] * vec2[1] - vec3[1] * vec2[0];*/
+
+		newPoint.x = (vec3[0]	* pointsX[i]	+ vec3[1]	* pointsY[i]	+ vec3[2]	* pointsZ[i]);
+		newPoint.y = (vec2[0]	* pointsX[i]	+ vec2[1]	* pointsY[i]	+ vec2[2]	* pointsZ[i]);
+		newPoint.z = (vec1[0]	* pointsX[i]	+ vec1[1]	* pointsY[i]	+ vec1[2]	* pointsZ[i]);
 
 		pointsX[i] = newPoint.x;
 		pointsY[i] = newPoint.y;

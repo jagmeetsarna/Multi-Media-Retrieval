@@ -312,11 +312,13 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         grid->momentTest();
         grid->computeFaceNormals();
         grid->computeVertexNormals();
+        break;
     }
     case 'p': {
         grid->PCARotation();
         grid->computeFaceNormals();
         grid->computeVertexNormals();
+        break;
     }
     }
     glutPostRedisplay();
@@ -375,8 +377,8 @@ int main(int argc, char* argv[])
     grid = std::get<0>(tup);
     fis[index] = std::get<1>(tup);
 
-    grid->computeFaceNormals();
-    grid->computeVertexNormals();
+    //grid->computeFaceNormals();
+    //grid->computeVertexNormals();
 
     glutInit(&argc, argv);								                //Initialize the GLUT toolkit
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
