@@ -106,6 +106,12 @@ protected:
 	VectorAttributes    faceNormals;
 	std::string	cls;
 
+	float				surfaceArea;
+	float				compactness;
+	float				boundingBoxVolume;
+	float				diameter;
+	float				eccentricity;
+
 };
 
 
