@@ -85,18 +85,18 @@ public:
 	int sgn(float x) {
 		if (x > 0) return 1;
 		if (x < 0) return -1;
-		return 0;
+		return 1;
 	}
 	void PCARotation();
 
+	vector<float>		eigenVec1, eigenVec2, eigenVec3;
+	int					f0, f1, f2;
 
 protected:
 
 	ScalarAttributes	scalars;
 
 	Eigen::Matrix3f		covarianceMatrix;
-
-	vector<float>		eigenVec1, eigenVec2, eigenVec3;
 
 	vector<Point3d>		cellCentroids;
 

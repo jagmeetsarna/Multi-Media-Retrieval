@@ -5,6 +5,7 @@
 #include <iostream>
 #include <io.h>
 #include <filesystem>
+#include <math.h>
 
 #include <fstream>
 #include <filesystem>
@@ -17,6 +18,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 void loadFilter();
+# define M_PI           3.14159265358979323846  /* pi */
 
 string fileName;
 
@@ -271,9 +273,6 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
                 float fz = (point[2] - fi.bZ) / factor;
 
                 //fs << fx << " " << fy << " " << fz << endl;
-
-                //grid->PCARotation();                          // HERE GOES THE FUNCTION FOR THE PCA ROTATION
-                //g->momentTest();                              // FUNCTION FOR THE MOMENT TEST
             }
 
             //Write the new points into the file.
@@ -309,15 +308,224 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
         break;
     }
     case 't': {
+
+        grid->PCARotation();
         grid->momentTest();
-        grid->computeFaceNormals();
-        grid->computeVertexNormals();
+        grid->PCARotation();
+        grid->momentTest();
+        
+        float angle;
+        float x, y, z;
+
+        x = grid->eigenVec1[0];
+        y = grid->eigenVec1[1];
+        z = grid->eigenVec1[2];
+        angle = acos(x / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        cout << angle << endl;
+
+        x = grid->eigenVec2[0];
+        y = grid->eigenVec2[1];
+        z = grid->eigenVec2[2];
+        angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        cout << angle << endl;
+
+        x = grid->eigenVec3[0];
+        y = grid->eigenVec3[1];
+        z = grid->eigenVec3[2];
+        angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        cout << angle << endl;
+
         break;
     }
     case 'p': {
-        grid->PCARotation();
-        grid->computeFaceNormals();
-        grid->computeVertexNormals();
+
+        scanFolder("Normalized_DB_Remeshed");
+
+        fstream filtout;
+        /*filtout.open("before_PCA.csv", ios::out);
+        filtout << "sep=," << endl;
+        filtout << "Index, angleX, angleY, angleZ" << endl;
+        for (int i = 0; i < FILTER_SIZE; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+            {
+                cout << i << endl;
+                cout << "No known face type!" << endl;
+                continue;
+            }
+
+            tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_Remeshed/" + fi.cls + "/" + fi.path);
+            Grid* g = get<0>(tup);
+            g->computeEigenvectors();
+
+            if (fi.typeOfFace == "")
+                continue;
+
+            float angle;
+            float x, y, z;
+
+            filtout << i;
+            filtout << ",";
+
+            x = g->eigenVec1[0];
+            y = g->eigenVec1[1];
+            z = g->eigenVec1[2];
+            angle = acos(x / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+            angle = angle / M_PI;
+            filtout << angle;
+            filtout << ",";
+
+            x = g->eigenVec2[0];
+            y = g->eigenVec2[1];
+            z = g->eigenVec2[2];
+            angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+            angle = angle / M_PI;
+            filtout << angle;
+            filtout << ",";
+
+            x = g->eigenVec3[0];
+            y = g->eigenVec3[1];
+            z = g->eigenVec3[2];
+            angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+            angle = angle / M_PI;
+            filtout << angle;
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        filtout.close();*/
+
+        cout << "PCA Rotation..." << endl;
+
+        string s = "Normalized_DB_Remeshed_PCA";
+        mkdir(s.c_str());
+
+        for (int i = 0; i < FILTER_SIZE; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+            {
+                cout << i << endl;
+                cout << "No known face type!" << endl;
+                continue;
+            }
+
+            mkdir((s + "/" + fi.cls).c_str());
+            tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_Remeshed/" + fi.cls + "/" + fi.path);
+
+            Grid* g = get<0>(tup);
+
+            g->PCARotation();
+            g->momentTest();
+            grid->PCARotation();
+            grid->momentTest();
+
+            fstream fs;
+            cout << s + "/" + fi.cls + "/" + fi.path << endl;
+            fs.open(s + "/" + fi.cls + "/" + fi.path, ios::out);
+            fs << "OFF" << endl;
+            fs << fi.numVertices << " ";
+            fs << fi.numFaces << " ";
+            fs << 0 << endl;
+
+            //Write the new points into the file.
+            for (int j = 0; j < g->numPoints(); j++)
+            {
+                float* point = new float[3];
+                g->getPoint(j, point);
+
+                float fx = point[0];
+                float fy = point[1];
+                float fz = point[2];
+
+                fs << fx << " " << fy << " " << fz << endl;
+            }
+
+
+
+            for (int j = 0; j < fi.numFaces; j++)
+            {
+                int* indices = new int[3];
+                g->getCell(j, indices);
+
+                fs << "3 " << indices[0] << " " << indices[1] << " " << indices[2] << endl;
+            }
+
+            fs.close();
+            delete g;
+        }
+        cout << "PCA Rotation complete!" << endl;
+
+        filtout.open("after_PCA.csv", ios::out);
+        filtout << "sep=," << endl;
+        filtout << "Index, angleX, angleY, angleZ, fX, fY, fZ" << endl;
+        for (int i = 0; i < FILTER_SIZE; i++)
+        {
+            FilterItem fi = fis[i];
+
+            if (fi.typeOfFace == "")
+            {
+                cout << i << endl;
+                cout << "No known face type!" << endl;
+                continue;
+            }
+
+            tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_Remeshed_PCA/" + fi.cls + "/" + fi.path);
+            Grid* g = get<0>(tup);
+            g->computeEigenvectors();
+
+            if (fi.typeOfFace == "")
+                continue;
+
+            float angle;
+            float x, y, z;
+
+            filtout << i;
+            filtout << ",";
+
+            x = g->eigenVec1[0];
+            y = g->eigenVec1[1];
+            z = g->eigenVec1[2];
+            angle = acos(x / sqrt(pow(x,2) + pow(y,2) + pow(z,2)));
+            angle *= (180/ M_PI);
+            filtout << angle;
+            filtout << ",";
+
+            x = g->eigenVec2[0];
+            y = g->eigenVec2[1];
+            z = g->eigenVec2[2];
+            angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+            angle *= (180 / M_PI);
+            filtout << angle;
+            filtout << ",";
+
+            x = g->eigenVec3[0];
+            y = g->eigenVec3[1];
+            z = g->eigenVec3[2];
+            angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+            angle *= (180 / M_PI);
+            filtout << angle;
+            filtout << ",";
+
+
+            filtout << g->f0;
+            filtout << ",";
+            filtout << g->f1;
+            filtout << ",";
+            filtout << g->f2;
+
+            filtout << endl;
+        }
+
+        cout << "Outputted!" << endl;
+        filtout.close();
+
         break;
     }
     }

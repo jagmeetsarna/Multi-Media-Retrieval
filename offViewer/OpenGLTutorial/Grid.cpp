@@ -196,12 +196,26 @@ void Grid::computeCovarianceMatrix() {
 void Grid::computeEigenvectors() {
 
 	computeCovarianceMatrix();
+	eigenVec3.clear();
+	eigenVec2.clear();
+	eigenVec1.clear();
 
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
-	cout << "Eigenvalues: ";
+
+	for (int i = 0; i < 3; i++) {
+		eigenVec3.push_back(eig.eigenvectors().col(0)(i));
+		eigenVec2.push_back(eig.eigenvectors().col(1)(i));
+		eigenVec1.push_back(eig.eigenvectors().col(2)(i));
+	}
+
+	eigenVec3[0] = (eigenVec1[1] * eigenVec2[2] - eigenVec1[2] * eigenVec2[1]);
+	eigenVec3[1] = (eigenVec1[2] * eigenVec2[0] - eigenVec1[0] * eigenVec2[2]);
+	eigenVec3[2] = (eigenVec1[0] * eigenVec2[1] - eigenVec1[1] * eigenVec2[0]);
+
+	/*cout << "Eigenvalues: ";
 	cout << eig.eigenvalues() << endl;
 	cout << "Eigenvectors: ";
-	cout << eig.eigenvectors() << endl << endl;
+	cout << eig.eigenvectors() << endl << endl;*/
 
 }
 
@@ -266,6 +280,23 @@ void Grid::momentTest() {
 		0, sgn(fY), 0,
 		0, 0, sgn(fZ);
 
+	getCellCentroids();
+
+	fX = 0;
+	fY = 0;
+	fZ = 0;
+
+	for (int i = 0; i < numCells(); i++) {
+
+		fX += (sgn(cellCentroids[i].x) * pow(cellCentroids[i].x, 2));
+		fY += (sgn(cellCentroids[i].y) * pow(cellCentroids[i].y, 2));
+		fZ += (sgn(cellCentroids[i].z) * pow(cellCentroids[i].z, 2));
+	}
+
+	f0 = fX;
+	f1 = fY;
+	f2 = fZ;
+
 	cout << sgn(fX) << endl;
 	cout << sgn(fY) << endl;
 	cout << sgn(fZ) << endl;
@@ -273,15 +304,16 @@ void Grid::momentTest() {
 }
 
 void Grid::PCARotation() {
+
 	computeCovarianceMatrix();
-	computeEigenvectors();
+
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
 	vector<float> vec1, vec2, vec3;
 
 	for (int i = 0; i < 3; i++) {
-		vec1.push_back(eig.eigenvectors().col(0)(i));
+		vec3.push_back(eig.eigenvectors().col(0)(i));
 		vec2.push_back(eig.eigenvectors().col(1)(i));
-		vec3.push_back(eig.eigenvectors().col(2)(i));
+		vec1.push_back(eig.eigenvectors().col(2)(i));
 	}
 
 
@@ -289,23 +321,22 @@ void Grid::PCARotation() {
 
 		Point3d newPoint;
 
-		newPoint.x = (vec1[0] * pointsX[i] + vec1[1] * pointsY[i] + vec1[2] * pointsZ[i]);
-		newPoint.y = (vec2[0] * pointsX[i] + vec2[1] * pointsY[i] + vec2[2] * pointsZ[i]);
-
-
-		//vec3 = crossproduct of vec1 and vec2
-		/*vec1[0] = vec3[1] * vec2[2] - vec3[2] * vec2[1];
-		vec1[0] = vec3[2] * vec2[0] - vec3[0] * vec2[2];
-		vec1[0] = vec3[0] * vec2[1] - vec3[1] * vec2[0];*/
-
-		newPoint.x = (vec3[0]	* pointsX[i]	+ vec3[1]	* pointsY[i]	+ vec3[2]	* pointsZ[i]);
+		newPoint.x = (vec1[0]	* pointsX[i]	+ vec1[1]	* pointsY[i]	+ vec1[2]	* pointsZ[i]);
 		newPoint.y = (vec2[0]	* pointsX[i]	+ vec2[1]	* pointsY[i]	+ vec2[2]	* pointsZ[i]);
-		newPoint.z = (vec1[0]	* pointsX[i]	+ vec1[1]	* pointsY[i]	+ vec1[2]	* pointsZ[i]);
+
+		vec3[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
+		vec3[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
+		vec3[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
+
+		newPoint.z = (vec3[0]	* pointsX[i]	+ vec3[1]	* pointsY[i]	+ vec3[2]	* pointsZ[i]);
 
 		pointsX[i] = newPoint.x;
 		pointsY[i] = newPoint.y;
 		pointsZ[i] = newPoint.z;
 	}
+
+	//computeCovarianceMatrix();
+	computeEigenvectors();
 
 
 }
