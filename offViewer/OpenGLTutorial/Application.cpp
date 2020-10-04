@@ -311,8 +311,6 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
 
         grid->PCARotation();
         grid->momentTest();
-        grid->PCARotation();
-        grid->momentTest();
         
         float angle;
         float x, y, z;
@@ -479,6 +477,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_Remeshed_PCA/" + fi.cls + "/" + fi.path);
             Grid* g = get<0>(tup);
             g->computeEigenvectors();
+            g->momentTest();
 
             if (fi.typeOfFace == "")
                 continue;

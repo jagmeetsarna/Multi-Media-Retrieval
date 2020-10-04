@@ -161,7 +161,7 @@ void Grid::computeCovarianceMatrix() {
 		covariance.push_back(entry);
 	}
 
-	for (int i = 0; i < pointsX.size(); i++) {
+	for (int i = 0; i < numPoints(); i++) {
 		means[0] += pointsX[i];
 		means[1] += pointsY[i];
 		means[2] += pointsZ[i];
@@ -173,7 +173,7 @@ void Grid::computeCovarianceMatrix() {
 		points.push_back(point);
 	}
 		
-	means[0] /= points.size(), means[1] /= points.size(), means[2] /= points.size();
+	means[0] /= numPoints(), means[1] /= numPoints(), means[2] /= numPoints();
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -203,18 +203,21 @@ void Grid::computeEigenvectors() {
 	Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(covarianceMatrix);
 
 	for (int i = 0; i < 3; i++) {
-		eigenVec3.push_back(eig.eigenvectors().col(0)(i));
-		eigenVec2.push_back(eig.eigenvectors().col(1)(i));
-		eigenVec1.push_back(eig.eigenvectors().col(2)(i));
+		eigenVec3.push_back(eig.eigenvectors().col(0).normalized()(i));
+		eigenVec2.push_back(eig.eigenvectors().col(1).normalized()(i));
+		eigenVec1.push_back(eig.eigenvectors().col(2).normalized()(i));
 	}
 
 	eigenVec3[0] = (eigenVec1[1] * eigenVec2[2] - eigenVec1[2] * eigenVec2[1]);
 	eigenVec3[1] = (eigenVec1[2] * eigenVec2[0] - eigenVec1[0] * eigenVec2[2]);
 	eigenVec3[2] = (eigenVec1[0] * eigenVec2[1] - eigenVec1[1] * eigenVec2[0]);
 
-	/*cout << "Eigenvalues: ";
+
+
+
+	cout << "Eigenvalues: ";
 	cout << eig.eigenvalues() << endl;
-	cout << "Eigenvectors: ";
+	/*cout << "Eigenvectors: ";
 	cout << eig.eigenvectors() << endl << endl;*/
 
 }
@@ -293,13 +296,13 @@ void Grid::momentTest() {
 		fZ += (sgn(cellCentroids[i].z) * pow(cellCentroids[i].z, 2));
 	}
 
-	f0 = fX;
-	f1 = fY;
-	f2 = fZ;
+	f0 = sgn(fX);
+	f1 = sgn(fY);
+	f2 = sgn(fZ);
 
-	cout << sgn(fX) << endl;
-	cout << sgn(fY) << endl;
-	cout << sgn(fZ) << endl;
+	cout << f0 << endl;
+	cout << f1 << endl;
+	cout << f2 << endl;
 
 }
 
@@ -311,9 +314,9 @@ void Grid::PCARotation() {
 	vector<float> vec1, vec2, vec3;
 
 	for (int i = 0; i < 3; i++) {
-		vec3.push_back(eig.eigenvectors().col(0)(i));
-		vec2.push_back(eig.eigenvectors().col(1)(i));
-		vec1.push_back(eig.eigenvectors().col(2)(i));
+		vec3.push_back(eig.eigenvectors().col(0).normalized()(i));
+		vec2.push_back(eig.eigenvectors().col(1).normalized()(i));
+		vec1.push_back(eig.eigenvectors().col(2).normalized()(i));
 	}
 
 
