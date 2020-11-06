@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <iostream>
 #include <io.h>
+#include <conio.h>
 #include <filesystem>
 #include <math.h>
 
@@ -251,7 +252,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
             }
 
             mkdir((s + "/" + fi.cls).c_str());
-            tuple<Grid*, FilterItem> tup = openFile("Sample_LabeledDB/" + fi.cls + "/" + fi.path);
+            tuple<Grid*, FilterItem> tup = openFile("Mechs/" + fi.cls + "/" + fi.path);
 
             Grid* g = get<0>(tup);
             float factor = max((fi.maxX - fi.minX), max((fi.maxY - fi.minY), (fi.maxZ - fi.minZ)));
@@ -272,7 +273,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
                 float fy = (point[1] - fi.bY) / factor;
                 float fz = (point[2] - fi.bZ) / factor;
 
-                //fs << fx << " " << fy << " " << fz << endl;
+                fs << fx << " " << fy << " " << fz << endl;
             }
 
             //Write the new points into the file.
@@ -285,7 +286,7 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
                 float fy = point[1];
                 float fz = point[2];
 
-                fs << fx << " " << fy << " " << fz << endl;
+                //fs << fx << " " << fy << " " << fz << endl;
             }
 
 
@@ -340,67 +341,13 @@ void keyboard(unsigned char c, int, int)					//Callback for keyboard events:
     }
     case 'p': {
 
-        scanFolder("Normalized_DB_Remeshed");
+        scanFolder("Normalized_DB");
 
         fstream filtout;
-        /*filtout.open("before_PCA.csv", ios::out);
-        filtout << "sep=," << endl;
-        filtout << "Index, angleX, angleY, angleZ" << endl;
-        for (int i = 0; i < FILTER_SIZE; i++)
-        {
-            FilterItem fi = fis[i];
-
-            if (fi.typeOfFace == "")
-            {
-                cout << i << endl;
-                cout << "No known face type!" << endl;
-                continue;
-            }
-
-            tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_Remeshed/" + fi.cls + "/" + fi.path);
-            Grid* g = get<0>(tup);
-            g->computeEigenvectors();
-
-            if (fi.typeOfFace == "")
-                continue;
-
-            float angle;
-            float x, y, z;
-
-            filtout << i;
-            filtout << ",";
-
-            x = g->eigenVec1[0];
-            y = g->eigenVec1[1];
-            z = g->eigenVec1[2];
-            angle = acos(x / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-            angle = angle / M_PI;
-            filtout << angle;
-            filtout << ",";
-
-            x = g->eigenVec2[0];
-            y = g->eigenVec2[1];
-            z = g->eigenVec2[2];
-            angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-            angle = angle / M_PI;
-            filtout << angle;
-            filtout << ",";
-
-            x = g->eigenVec3[0];
-            y = g->eigenVec3[1];
-            z = g->eigenVec3[2];
-            angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-            angle = angle / M_PI;
-            filtout << angle;
-            filtout << endl;
-        }
-
-        cout << "Outputted!" << endl;
-        filtout.close();*/
 
         cout << "PCA Rotation..." << endl;
 
-        string s = "Normalized_DB_Remeshed_PCA";
+        string s = "Normalized_DB_PCA";
         mkdir(s.c_str());
 
         for (int i = 0; i < FILTER_SIZE; i++)
@@ -571,35 +518,236 @@ void loadFilter()
     }
 }
 
+void completeNormalization() {
+    scanFolder("DB");
+
+    cout << "Normalizing current content..." << endl;
+    string s = "Normalized_DB";
+    mkdir(s.c_str());
+
+    for (int i = 0; i < FILTER_SIZE; i++)
+    {
+        FilterItem fi = fis[i];
+
+        if (fi.typeOfFace == "")
+        {
+            cout << i << endl;
+            cout << "No known face type!" << endl;
+            continue;
+        }
+
+        mkdir((s + "/" + fi.cls).c_str());
+        tuple<Grid*, FilterItem> tup = openFile("DB/" + fi.cls + "/" + fi.path);
+
+        Grid* g = get<0>(tup);
+        float factor = max((fi.maxX - fi.minX), max((fi.maxY - fi.minY), (fi.maxZ - fi.minZ)));
+        fstream fs;
+        cout << s + "/" + fi.cls + "/" + fi.path << endl;
+        fs.open(s + "/" + fi.cls + "/" + fi.path, ios::out);
+        fs << "OFF" << endl;
+        fs << fi.numVertices << " ";
+        fs << fi.numFaces << " ";
+        fs << 0 << endl;
+
+        for (int j = 0; j < fi.numVertices; j++)
+        {
+            float* point = new float[3];
+            g->getPoint(j, point);
+
+            float fx = (point[0] - fi.bX) / factor;
+            float fy = (point[1] - fi.bY) / factor;
+            float fz = (point[2] - fi.bZ) / factor;
+
+            //Write the new points into the file.
+            fs << fx << " " << fy << " " << fz << endl;
+        }
+
+        //Write the new points into the file.
+        for (int j = 0; j < g->numPoints(); j++)
+        {
+            float* point = new float[3];
+            g->getPoint(j, point);
+
+            float fx = point[0];
+            float fy = point[1];
+            float fz = point[2];
+
+            //fs << fx << " " << fy << " " << fz << endl;
+        }
+
+        for (int j = 0; j < fi.numFaces; j++)
+        {
+            int* indices = new int[3];
+            g->getCell(j, indices);
+            fs << "3 " << indices[0] << " " << indices[1] << " " << indices[2] << endl;
+        }
+        fs.close();
+        delete g;
+    }
+
+    cout << "Normalizing phase 1 complete!" << endl;
+    scanFolder("Normalized_DB");
+    outputFilter("FilterOutput_after.csv");
+    scanFolder("Normalized_DB");
+    fstream filtout;
+    cout << "PCA Rotation..." << endl;
+    s = "Normalized_DB_PCA";
+    mkdir(s.c_str());
+    for (int i = 0; i < FILTER_SIZE; i++)
+    {
+        FilterItem fi = fis[i];
+
+        if (fi.typeOfFace == "")
+        {
+            cout << i << endl;
+            cout << "No known face type!" << endl;
+            continue;
+        }
+
+        mkdir((s + "/" + fi.cls).c_str());
+        tuple<Grid*, FilterItem> tup = openFile("Normalized_DB/" + fi.cls + "/" + fi.path);
+
+        Grid* g = get<0>(tup);
+
+        g->PCARotation();
+        g->momentTest();
+        //grid->PCARotation();
+        //grid->momentTest();
+
+        fstream fs;
+        cout << s + "/" + fi.cls + "/" + fi.path << endl;
+        fs.open(s + "/" + fi.cls + "/" + fi.path, ios::out);
+        fs << "OFF" << endl;
+        fs << fi.numVertices << " ";
+        fs << fi.numFaces << " ";
+        fs << 0 << endl;
+
+        //Write the new points into the file.
+        for (int j = 0; j < g->numPoints(); j++)
+        {
+            float* point = new float[3];
+            g->getPoint(j, point);
+
+            float fx = point[0];
+            float fy = point[1];
+            float fz = point[2];
+
+            fs << fx << " " << fy << " " << fz << endl;
+        }
+
+        for (int j = 0; j < fi.numFaces; j++)
+        {
+            int* indices = new int[3];
+            g->getCell(j, indices);
+
+            fs << "3 " << indices[0] << " " << indices[1] << " " << indices[2] << endl;
+        }
+
+        fs.close();
+        delete g;
+    }
+    cout << "PCA Rotation complete!" << endl;
+
+    filtout.open("after_PCA.csv", ios::out);
+    filtout << "sep=," << endl;
+    filtout << "Index, angleX, angleY, angleZ, fX, fY, fZ" << endl;
+    for (int i = 0; i < FILTER_SIZE; i++)
+    {
+        FilterItem fi = fis[i];
+
+        if (fi.typeOfFace == "")
+        {
+            cout << i << endl;
+            cout << "No known face type!" << endl;
+            continue;
+        }
+
+        tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_PCA/" + fi.cls + "/" + fi.path);
+        Grid* g = get<0>(tup);
+        g->computeEigenvectors();
+        g->momentTest();
+
+        if (fi.typeOfFace == "")
+            continue;
+
+        float angle;
+        float x, y, z;
+
+        filtout << i;
+        filtout << ",";
+
+        x = g->eigenVec1[0];
+        y = g->eigenVec1[1];
+        z = g->eigenVec1[2];
+        angle = acos(x / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        filtout << angle;
+        filtout << ",";
+
+        x = g->eigenVec2[0];
+        y = g->eigenVec2[1];
+        z = g->eigenVec2[2];
+        angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        filtout << angle;
+        filtout << ",";
+
+        x = g->eigenVec3[0];
+        y = g->eigenVec3[1];
+        z = g->eigenVec3[2];
+        angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
+        angle *= (180 / M_PI);
+        filtout << angle;
+        filtout << ",";
+        filtout << g->f0;
+        filtout << ",";
+        filtout << g->f1;
+        filtout << ",";
+        filtout << g->f2;
+        filtout << endl;
+    }
+    cout << "Outputted!" << endl;
+    filtout.close();
+}
+
 int main(int argc, char* argv[])
 {
+
+    cout << "Press 'v' to view a off or ply file." << endl;
+    cout << "Press 'n' to do a full normalization on a data base." << endl;
+    char  input = _getch();
+
     fis = new FilterItem[FILTER_SIZE];
     loadFilter();
 
-    string input;
-    cout << "Please specify the file you want to view:" << endl;
-    cin >> input;
+    if (input == 'v') {
 
-    std::tuple<Grid*, FilterItem> tup = openFile(input);
-    grid = std::get<0>(tup);
-    fis[index] = std::get<1>(tup);
+        string input;
+        cout << "Please specify the file you want to view:" << endl;
+        cin >> input;
 
-    grid->computeFaceNormals();
-    grid->computeVertexNormals();
+        std::tuple<Grid*, FilterItem> tup = openFile(input);
+        grid = std::get<0>(tup);
+        fis[index] = std::get<1>(tup);
 
-    glutInit(&argc, argv);								                //Initialize the GLUT toolkit
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-                                                                        //Ask GLUT to create next windows with a RGB framebuffer and a Z-buffer too
-    glutInitWindowSize(500, 500);							            //Tell GLUT how large are the windows we want to create next
-    glutCreateWindow(fileName.c_str());	                                //Create our window
+        grid->computeFaceNormals();
+        grid->computeVertexNormals();
 
-    glutMouseFunc(mouseclick);							                //Bind the mouse click and mouse drag (click-and-move) events to callbacks. This allows us
-    glutMotionFunc(mousemotion);
-    glutKeyboardFunc(keyboard);
-    glutDisplayFunc(draw);
-    //glutReshapeFunc(viewing);
-    glutMainLoop();										                //Start the event loop that displays the graph and handles window-resize events
+        glutInit(&argc, argv);								                //Initialize the GLUT toolkit
+        glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+        //Ask GLUT to create next windows with a RGB framebuffer and a Z-buffer too
+        glutInitWindowSize(500, 500);							            //Tell GLUT how large are the windows we want to create next
+        glutCreateWindow(fileName.c_str());	                                //Create our window
 
-
+        glutMouseFunc(mouseclick);							                //Bind the mouse click and mouse drag (click-and-move) events to callbacks. This allows us
+        glutMotionFunc(mousemotion);
+        glutKeyboardFunc(keyboard);
+        glutDisplayFunc(draw);
+        //glutReshapeFunc(viewing);
+        glutMainLoop();
+    }
+    if (input == 'n') {
+        completeNormalization();
+    }
     return 0;
 }
