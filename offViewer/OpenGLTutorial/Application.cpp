@@ -587,11 +587,11 @@ void completeNormalization() {
 
     cout << "Normalizing phase 1 complete!" << endl;
     scanFolder("Normalized_DB");
-    outputFilter("FilterOutput_after.csv");
-    scanFolder("Normalized_DB");
+    //outputFilter("FilterOutput_after.csv");
+    //scanFolder("Normalized_DB");
     fstream filtout;
     cout << "PCA Rotation..." << endl;
-    s = "Normalized_DB_PCA";
+    s = "Normalized_DB";
     mkdir(s.c_str());
     for (int i = 0; i < FILTER_SIZE; i++)
     {
@@ -647,67 +647,6 @@ void completeNormalization() {
         delete g;
     }
     cout << "PCA Rotation complete!" << endl;
-
-    filtout.open("after_PCA.csv", ios::out);
-    filtout << "sep=," << endl;
-    filtout << "Index, angleX, angleY, angleZ, fX, fY, fZ" << endl;
-    for (int i = 0; i < FILTER_SIZE; i++)
-    {
-        FilterItem fi = fis[i];
-
-        if (fi.typeOfFace == "")
-        {
-            cout << i << endl;
-            cout << "No known face type!" << endl;
-            continue;
-        }
-
-        tuple<Grid*, FilterItem> tup = openFile("Normalized_DB_PCA/" + fi.cls + "/" + fi.path);
-        Grid* g = get<0>(tup);
-        g->computeEigenvectors();
-        g->momentTest();
-
-        if (fi.typeOfFace == "")
-            continue;
-
-        float angle;
-        float x, y, z;
-
-        filtout << i;
-        filtout << ",";
-
-        x = g->eigenVec1[0];
-        y = g->eigenVec1[1];
-        z = g->eigenVec1[2];
-        angle = acos(x / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-        angle *= (180 / M_PI);
-        filtout << angle;
-        filtout << ",";
-
-        x = g->eigenVec2[0];
-        y = g->eigenVec2[1];
-        z = g->eigenVec2[2];
-        angle = acos(y / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-        angle *= (180 / M_PI);
-        filtout << angle;
-        filtout << ",";
-
-        x = g->eigenVec3[0];
-        y = g->eigenVec3[1];
-        z = g->eigenVec3[2];
-        angle = acos(z / sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-        angle *= (180 / M_PI);
-        filtout << angle;
-        filtout << ",";
-        filtout << g->f0;
-        filtout << ",";
-        filtout << g->f1;
-        filtout << ",";
-        filtout << g->f2;
-        filtout << endl;
-    }
-    cout << "Outputted!" << endl;
-    filtout.close();
 }
 
 int main(int argc, char* argv[])
